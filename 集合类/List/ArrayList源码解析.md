@@ -47,8 +47,6 @@ public class ArrayList<E> extends AbstractList<E>
 
    [randomaccess接口]: https://blog.csdn.net/weixin_39148512/article/details/79234817
 
-   [randomaccess接口](#randomaccess)
-
 3. Cloneable接口是一个标记接口，只有实现这个接口后，然后在类中重写Object中的clone方法，然后通过类调用clone方法才能克隆成功，如果不实现这个接口，则会抛出CloneNotSupportedException(克隆不被支持)异常。
 4. Serializable接口是一个标记接口，实现这个接口后，可以在
 
