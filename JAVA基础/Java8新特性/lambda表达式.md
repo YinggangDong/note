@@ -6,7 +6,17 @@
 
 lambda表达式是JAVA8的新特性之一，也称为闭包。
 
-Java SE 8添加了2个对集合数据进行批量操作的包: java.util.function 包以及 java.util.stream 包。 流(stream)就如同迭代器(iterator),但附加了许多额外的功能。 总的来说,lambda表达式和 stream 是自Java语言添加泛型(Generics)和注解(annotation)以来最大的变化。
+在我看来，lambda表达式可以理解为对只有一个函数的匿名内部类的再次简化，不需要再
+
+
+
+
+
+### 定义
+
+## 演进过程
+
+lambda表达式从根本上来说是用来简化代码的，尤其针对的是
 
 ## 基本语法
 
