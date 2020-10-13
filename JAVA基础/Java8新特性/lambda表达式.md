@@ -4,31 +4,11 @@
 
 ## 概念
 
-lambda表达式是JAVA8的新特性之一，也称为闭包。
+在Java中，Lambda 表达式 (lambda expression)是一个匿名函数。
 
-在我看来，lambda表达式可以理解为对只有一个函数的匿名内部类的再次简化，不需要再通过写类似以下代码的匿名内部类来实现:
+Lambda表达式基于数学中的λ演算得名，直接对应于其中的Lambda抽象(lambda abstraction)，是一个匿名函数，即没有函数名的函数。Lambda表达式可以表示闭包，但又不同于函数式语言的闭包。Lambda表达式让代码变得简洁并且允许你传递行为，在java8出现之前传递行为的方法只有通过匿名内部类。
 
-```java
-/**
- * 4.匿名内部类 AnonymousInnerClass
- * 没有通过class关键字进行类的声明，直接通过重写FunctionalInterface接口的
- * lambda方法的方式创建了一个实现该接口的匿名类
- */
-MyFunctionalInterface anonymousInnerClass = new MyFunctionalInterface() {
-
-    @Override
-    public void lambda() {
-        System.out.println("这是一个匿名内部类");
-    }
-};
-anonymousInnerClass.lambda();
-```
-
-但实际在运行过程中可以发现，它的实质还是一个被简化的匿名内部类，尽管写作格式被简化，但实际运行中与匿名内部类无异。
-
-![image-20201012203525545](lambda表达式.assets/image-20201012203525545.png)
-
-其中四个实例对象都是通过lambda表达式实现函数式接口 MathOperation 的 operation(int a, int b) 方法的方式来进行声明的，从红框中可以看出，这里其实是生成了四个匿名类。冒号后面实际就是内部类的地址。
+Lambda表达式本质上就是一个匿名(即未命名的方法)。**但是这个方法是不能独立执行的（lambda表达式和函数式接口是严格绑定的）**，而是用于实现由函数式接口定义的一个方法（即：**使用 Lambda 表达式实例化函数式接口**）。因此，Lambda表达式会导致运行中产生一个匿名类。
 
 
 
@@ -36,7 +16,7 @@ anonymousInnerClass.lambda();
 
 lambda表达式从根本上来说是用来简化代码的，简化的是函数式接口的实现形式。
 
-以下面的代码为例，看一下代码简化的过程。
+以下面的代码为例，看一下JAVA在代码简化的过程中的产物。
 
 主体过程如下：
 
@@ -165,6 +145,14 @@ public class LambdaEvolution {
 
 ## 基本语法
 
+lambda有三部分构成：
+
+第一部分 为一个括号内用逗号分隔的**形式参数**，参数是函数式接口里面方法的参数；
+
+第二部分 为一个箭头符号：**->**；
+
+第三部分 为方法体，可以是表达式和代码块。
+
 基本语法:
 
 **(parameters) -> expression**
@@ -253,9 +241,60 @@ public class LambdaDemo {
 }
 ```
 
-## lambda表达式变量作用域
+## 与匿名类的区别
+
+在我看来，lambda表达式可以理解为对只有一个函数的匿名内部类的再次简化，代码简化如下:
+
+```java
+/**
+ * 4.匿名内部类 AnonymousInnerClass
+ * 没有通过class关键字进行类的声明，直接通过重写FunctionalInterface接口的
+ * lambda方法的方式创建了一个实现该接口的匿名类
+ */
+MyFunctionalInterface anonymousInnerClass = new MyFunctionalInterface() {
+
+    @Override
+    public void lambda() {
+        System.out.println("这是一个匿名内部类");
+    }
+};
+anonymousInnerClass.lambda();
+/**
+ * 5.lambda简化的匿名内部类
+ * 通过lambda表达式简化了匿名内部类的创建方式
+ */
+MyFunctionalInterface lambdaClass =
+  () -> System.out.println("这是一个lambda简化的匿名内部类");
+lambdaClass.lambda();
+```
+
+但实际在运行过程中可以发现，它的实质还是一个被简化的匿名内部类，尽管写作格式被简化，但实际运行中与匿名内部类无异。![image-20201012203525545](lambda表达式.assets/image-20201012203525545.png)
+
+其中四个实例对象都是通过lambda表达式实现函数式接口 MathOperation 的 operation(int a, int b) 方法的方式来进行声明的，从红框中可以看出，这里其实是生成了四个匿名类。冒号后面实际就是内部类的地址。
+
+但是我们是否可以有这样的表述“lambda表达式是否只是一个匿名内部类的语法？”，答案是No，原因有两种：
+
+ **性能影响**: 假如lambda表达式是采用匿名内部类实现的，那么每一个lambda表达式都会在磁盘上生成一个class文件。当JVM启动时，这些class文件会被加载进来，因为所有的class文件都需要在启动时加载并且在使用前确认，从而会导致JVM的启动变慢。（以LambdaRunnable和LambdaDemo为例）
+
+**向后的扩展性:** 如果Java8的设计者从一开始就采用匿名内部类的方式，那么这将限制lambda表达式未来的发展范围。
+
+另外的区别还有：
+
+1. 在匿名类中，this 指代的是匿名类本身；而在lambda表达式中，this指代的是lambda表达式所在的这个类。
+
+2. lambda表达式的类型是由上下文决定的，而匿名类中必须在创建实例的时候明确指定。
+
+3. Lambda 表达式的编译方法是：Java 编译器编译 Lambda 表达式并将他们转化为类里面的私有函数，它使用 invokedynamic 指令（ Java 7 ，即动态启用）动态绑定该方法。
+
+Lambda表达式是采用动态启用（Java7）来延迟在运行时的加载策略。当javac编译代码时，它会捕获代码中的Lambda表达式并且生成一个动态启用的调用地址(称为Lambda工厂）。当动态启用被调用时，就会向Lambda表达式发生转换的地方返回一个函数式接口的实例。然后将Lambda表达式的内容转换到一个将会通过动态启用来调用的方法中。在这一步骤中，JVM实现者有自由选择策略的权利。
 
 
+
+## lambda作用域
+
+在[Lambda表达式](http://blog.csdn.net/sun_promise/article/details/51121205)中访问外层作用域和旧版本的匿名对象中的方式类似。你可以直接访问标记了final的外层局部变量，或者实例的字段以及静态变量。
+
+[Lambda表达式](http://blog.csdn.net/sun_promise/article/details/51121205)不会从超类（supertype）中继承任何变量名，也不会引入一个新的作用域。Lambda表达式基于词法作用域，也就是说lambda表达式函数体里面的变量和它外部环境的变量具有相同的语义（也包括lambda表达式的形式参数）。此外，this关键字及其引用，在Lambda表达式内部和外部也拥有相同的语义。
 
 4、方法和构造函数引用
 
@@ -264,3 +303,10 @@ public class LambdaDemo {
 6、内置函数式接口
 
 7、Optionals
+
+## 参考内容
+
+- [1]  [Lambda表达式和函数式接口](https://www.cnblogs.com/gclokok/p/10941002.html)
+- [2]  [lambda表达式的变量作用域](https://blog.csdn.net/weixin_38091140/article/details/84793802)
+- [3]  [Java 8 新特性：Lambda 表达式](https://blog.csdn.net/sun_promise/article/details/51121205) ---非常详细的lambda详解
+- [4]  []()
