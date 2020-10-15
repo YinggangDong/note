@@ -6,7 +6,13 @@
 
 在Java中，Lambda 表达式 (lambda expression)是一个匿名函数。
 
-Lambda表达式基于数学中的λ演算得名，直接对应于其中的Lambda抽象(lambda abstraction)，是一个匿名函数，即没有函数名的函数。Lambda表达式可以表示闭包，但又不同于函数式语言的闭包。Lambda表达式让代码变得简洁并且允许你传递行为，在java8出现之前传递行为的方法只有通过匿名内部类。
+Lambda表达式基于数学中的λ演算得名，直接对应于其中的Lambda抽象(lambda abstraction)，是一个匿名函数，即没有函数名的函数。Lambda表达式可以表示闭包，但又不同于函数式语言的闭包（例如 JavaScript 中的方法）。Lambda表达式让代码变得简洁并且允许你传递行为，在java8出现之前传递行为的方法只有通过匿名内部类。
+
+闭包的简单定义：
+
+> 用科学的说法来说，闭包就是一个函数的实例，且它可以无限 制地访问那个函数的非本地变量。例如，闭包可以作为参数传递给另一个函数。它也可以访问和修改其作用域之外的变量。
+
+现在，Java 8的Lambda和匿名类可以做类似于闭包的事情： 它们可以作为参数传递给方法，并且可以访问其作用域之外的变量。但有一个限制：它们不 能修改定义Lambda的方法的局部变量的内容。`这些变量必须是隐式最终的`。可以认为**Lambda 是对值封闭，而不是对变量封闭。**这种限制存在的原因在于局部变量保存在栈上， 并且隐式表示它们仅限于其所在线程。如果允许捕获可改变的局部变量，就会引发造成线程 不安全的新的可能性，而这是我们不想看到的（实例变量可以，因为它们保存在堆中，而堆 是在线程之间共享的） 。
 
 Lambda表达式本质上就是一个匿名(即未命名的方法)。**但是这个方法是不能独立执行的（lambda表达式和函数式接口是严格绑定的）**，而是用于实现由函数式接口定义的一个方法（即：**使用 Lambda 表达式实例化函数式接口**）。因此，Lambda表达式会导致运行中产生一个匿名类。
 
@@ -292,9 +298,181 @@ Lambda表达式是采用动态启用（Java7）来延迟在运行时的加载策
 
 ## lambda作用域
 
-在[Lambda表达式](http://blog.csdn.net/sun_promise/article/details/51121205)中访问外层作用域和旧版本的匿名对象中的方式类似。你可以直接访问标记了final的外层局部变量，或者实例的字段以及静态变量。
+lambda表达式的作用域和其被嵌入的方法作用域一致，并不会另外引入作用域。也就是说，在lambda表达式内，可以调用其被嵌入的方法可以调用的一切变量，方法等。但同时lambda中入参或定义的变量也不能够和作用域内已存在的变量重名。
 
-[Lambda表达式](http://blog.csdn.net/sun_promise/article/details/51121205)不会从超类（supertype）中继承任何变量名，也不会引入一个新的作用域。Lambda表达式基于词法作用域，也就是说lambda表达式函数体里面的变量和它外部环境的变量具有相同的语义（也包括lambda表达式的形式参数）。此外，this关键字及其引用，在Lambda表达式内部和外部也拥有相同的语义。
+从调用目标来分的话，可以分为以下四大类：
+
+1. 访问局部变量
+2. 访问对象字段/静态变量
+3. 接口默认方法
+4. this对象
+
+### 访问局部变量
+
+在lambda中访问局部变量时，是可读不可写的，需要保证局部变量、对象是 显式或隐式不可变的具有final语义的 最终变量。
+
+对于局部变量来说，若变量为类似int、string等类型时，不可变通常表现为其值不能够出现二次赋值的情况，例如下面代码中的变量 localNum，尽管没有final对它进行限定，但实际在任何地方进行对齐值的变动，如两处被注释的 localNum++；代码，都会导致编译报错，提示lambda表达式中使用的变量应当是final的。
+
+**局部变量非具final语义的最终变量：**
+
+![image-20201015182716113](lambda表达式.assets/image-20201015182716113.png)
+
+整体代码如下：
+
+```java
+/**
+     * localNumTest 方法是 1.lambda访问局部变量
+     * 对于局部变量，lambda可读，不可写，即可以使用隐性的具有final语义的局部变量
+     *
+     * @author dongyinggang
+     * @date 2020/10/13 19:41
+     */
+    private void localNumTest() {
+        //IntConsumer -以int作为输入，执行某种动作，没有返回值
+
+        System.out.println("1.访问局部变量：");
+        //1.1 可以直接在lambda表达式中访问外层的局部变量
+        //localNum可以显式的声明为final,也可以不声明,但要求其实际不可变
+        int localNum = 1;
+        IntConsumer localNumOperation = (a) -> {
+            //编译出错
+//            localNum++;
+            System.out.println("局部变量值为：" + (localNum));
+        };
+        localNumOperation.accept(0);
+        //localNum++;不合法,如果localNum值改变,编译报错,提示lambda表达式中使用的变量应当是final的
+//        localNum++;
+    }
+```
+
+
+
+若变量实际是具有多属性的类对象，或类似List的集合对象，不可变表现为执行的目标地址不能够改变，但实际类对象的属性值或集合对象的元素是可变的，例如下面代码中的 tempObj 对象 和 list 数组，当它们被二次赋值为null时，都会有编译错误出现，但如果是通过set方法改变 tempObj 对象的属性或通过 add 方法给 list 添加元素，则不会出现编译错误，但在并发情况下，由于局部变量是非线程共享的，因此其最终的值具有不可预测的问题，因此在可能面临并发的情况中不推荐在lambda中对元素值进行修改。
+
+**list 和 tempObj 分别被重新赋值：**
+
+![image-20201015183439791](lambda表达式.assets/image-20201015183439791.png)
+
+整体代码如下：
+
+```java
+/**
+     * localObjTest 方法是 访问局部对象
+     *  在lambda表达式中访问局部对象时，局部对象不能够被重新赋值，即其指向地址不会修改，
+     *  但对象属性，或者类似List中的元素等都是可以被修改的
+     *  但是不推荐在lambda表达式中做这种操作，尤其是在
+     * @author dongyinggang
+     * @date 2020/10/15 16:27
+     */
+    private void localObjTest() {
+        //测试类
+        class TempObj{
+            private String tempField;
+
+            public void setTempField(String tempField) {
+                this.tempField = tempField;
+            }
+
+            public String getTempField() {
+                return tempField;
+            }
+        }
+        // 测试对象作为局部变量的调用情况
+        List<Integer> list = new ArrayList<>();
+        list.add(0);
+        List<Integer> countList = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+
+        TempObj tempObj = new TempObj();
+        tempObj.setTempField("原字段");
+        for (Integer i:countList){
+            new Thread(()->{
+                // 当不对list赋值，而是增加元素时，不会编译报错,
+                // 但在并发情况下，可能出现预期不到的内容,list内部元素位置不可控,虽然编译不报错，但不推荐
+                list.add(i);
+                //如果改变其指向,则会编译报错
+//                list = null;
+                //tempObj的 tempField 字段也是个不可预期的值，尽管编译不报错，但不推荐
+                tempObj.setTempField("新字段"+i);
+//                tempObj=null;
+            }).start();
+        }
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        list.forEach(System.out::println);
+        System.out.println(tempObj.getTempField());
+    }
+```
+
+
+
+同时，lambda表达式当中不允许声明一个与局部变量同名的参数或者局部变量。会编译报错。提示作用域内已有该名称的变量定义。
+
+**lambda表达式参数与局部变量重名：**
+
+![image-20201015182237629](lambda表达式.assets/image-20201015182237629.png)
+
+**lambda表达式中的局部变脸和外部变量重名：**
+
+![image-20201015182409066](lambda表达式.assets/image-20201015182409066.png)
+
+完整代码如下：
+
+```java
+/**
+     * alreadyDefinedDemo 方法是 lambda尝试声明一个与局部变量同名的参数或者局部变量
+     *  由于lambda表达式不会另外创建一个作用域，和其所在的方法体是同一个作用域
+     *  因此不能够声明一个与局部变量同名的参数或者局部变量
+     *  如果声明，会报 变量已经在作用域中进行了定义 的异常
+     * @author dongyinggang
+     * @date 2020/10/15 18:19
+     */
+    private void alreadyDefinedDemo() {
+        //1.2 在 Lambda 表达式当中不允许声明一个与局部变量同名的参数或者局部变量。编译报错
+        int localNum = 1;
+        IntConsumer localNumSameNameParam = (localNum)-> System.out.println("参数与局部变量重名");
+
+        IntConsumer localNumSameNameVariable = (a)-> {
+            String localNum = "局部变量与外部局部变量重名";
+            System.out.println(localNum);
+        };
+    }
+```
+
+### 访问对象字段和静态变量
+
+当在lambda表达式中访问对象字段与静态变量时，是既可读又可写的。
+
+整体代码如下：
+
+```java
+/**
+ * objectAndStaticTest 方法是 2.访问对象字段与静态变量
+ * 和局部变量不同的是，Lambda内部对于实例的字段（即：成员变量）以及静态变量是即可读又可写。
+ *
+ * @author dongyinggang
+ * @date 2020/10/13 19:41
+ */
+private void objectAndStaticTest() {
+    System.out.println("2.访问对象字段与静态变量：");
+    //访问静态变量staticNum和对象字段objectNum
+    IntConsumer staticNumOperation =
+            (a) -> System.out.println("对象字段值为：" + objectNum + "静态变量值为：" + staticNum);
+    staticNumOperation.accept(0);
+    //可读可写
+    staticNum++;
+    objectNum++;
+    staticNumOperation.accept(0);
+}
+```
+
+### 访问接口的默认方法
+
+
+
+
 
 4、方法和构造函数引用
 
@@ -309,4 +487,6 @@ Lambda表达式是采用动态启用（Java7）来延迟在运行时的加载策
 - [1]  [Lambda表达式和函数式接口](https://www.cnblogs.com/gclokok/p/10941002.html)
 - [2]  [lambda表达式的变量作用域](https://blog.csdn.net/weixin_38091140/article/details/84793802)
 - [3]  [Java 8 新特性：Lambda 表达式](https://blog.csdn.net/sun_promise/article/details/51121205) ---非常详细的lambda详解
-- [4]  []()
+- [4]  [Java 8 - lambda 捕获机制 ： 使用局部变量](https://blog.csdn.net/qq_15071263/article/details/102390699)
+- [5]  [学习Javascript闭包（Closure）](http://www.ruanyifeng.com/blog/2009/08/learning_javascript_closures.html)
+- 
