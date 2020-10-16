@@ -307,6 +307,24 @@ lambda表达式的作用域和其被嵌入的方法作用域一致，并不会�
 3. 接口默认方法
 4. this对象
 
+针对lambda作用域的相关测试过程以函数式接口 IntConsumer 为例，该接口有两个方法，一个抽象方法 void accept(int value); 一个默认方法 default IntConsumer andThen(IntConsumer after) ，因为本文只是对其作用域进行分析，因此对该接口的实际应用场景不做研究。
+
+该接口实际是 int 类型的一个消费者接口，其中 accept 方法是被重写用来定义其消费行为，默认方法 andThen 是返回一个 IntConsumer 接口对象，并通过入参传入一个 IntConsumer 对象，记为B，andThen方法所在的 IntConsumer 实现类对象记为A, andThen方法会先调用A的accpet方法，再调用B的accept方法，对应的场景就是针对一个变量 value ，需要进行两（多）次消费的场景。
+
+该函数式接口的代码如下：
+
+```java
+@FunctionalInterface
+public interface IntConsumer {
+    void accept(int value);
+    
+    default IntConsumer andThen(IntConsumer after) {
+        Objects.requireNonNull(after);
+        return (int t) -> { accept(t); after.accept(t); };
+    }
+}
+```
+
 ### 访问局部变量
 
 在lambda中访问局部变量时，是可读不可写的，需要保证局部变量、对象是 显式或隐式不可变的具有final语义的 最终变量。
@@ -469,6 +487,46 @@ private void objectAndStaticTest() {
 ```
 
 ### 访问接口的默认方法
+
+lambda表达式不能够像匿名内部类一样直接调用接口的默认方法，以函数式接口 IntConsumer 为例，其 andThen 方法能够在匿名内部类的写法中在 accept 方法中被调用，但不能够在lambda表达式重写 accept 方法时进行调用。
+
+![image-20201016081749670](lambda表达式.assets/image-20201016081749670.png)
+
+整体代码如下：
+
+```java
+/**
+ * defaultMethodTest 方法是 测试访问接口的默认方法
+ * lambda表达式不能访问接口的默认方法
+ *
+ * @author dongyinggang
+ * @date 2020/10/15 18:49
+ */
+private void defaultMethodTest() {
+    System.out.println("3.测试访问接口的默认方法：");
+    /**
+     * 通过匿名内部类,可以在重写accept方法时调用IntConsumer的默认方法andThen
+     */
+    IntConsumer classTest = new IntConsumer() {
+        @Override
+        public void accept(int value) {
+            System.out.println(value + "调用accept方法,对value的第一次消费");
+            //调用本接口的默认方法,该方法返回一个IntConsumer对象,
+            // 该对象重写了accept方法,先调用当前accept方法,再调用其参数的accept方法
+            // 这里只是进行返回未调用其accept方法，没问题，但如果在本方法体里调用andThen返回值的
+            // accept方法，就会导致死循环
+            andThen((a) -> System.out.println("andThen方法"));
+        }
+    };
+
+    //不能调用IntConsumer的默认方法andThen
+    IntConsumer test = (tempField)-> andThen(System.out::println);
+
+    // 先调用classTest的accept方法,再调用andThen的参数的accept方法
+    classTest.andThen((a) ->
+            System.out.println(a + "调用andThen方法参数重写的accept方法,对入参的第二次消费")).accept(0);
+}
+```
 
 
 
