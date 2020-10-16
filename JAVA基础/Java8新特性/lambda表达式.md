@@ -528,13 +528,82 @@ private void defaultMethodTest() {
 }
 ```
 
+### lambda表达式中的this
+
+由于lambda表达式并不会创建新的作用域，所以在lambda中调用的this时实际是获取了其所在方法的所在类的一个对象。
+
+以下面代码为例，thisTest() 方法中使用lambda表达式获取到了一个IntConsumer的实现类对象，在lambda表达式中调用了 this.thisMethod(); 实际这里的 this 得到的就是一个 LambdaScopeDemo 的对象，可以使用其调用 LambdaScopeDemo 的方法。
+
+整体代码如下：
+
+```java
+/**
+ * thisTest 方法是 4.lambda表达式中的this测试
+ * 使用this会引用 该Lambda表达式的所在方法的this（即所在方法的类对象）
+ *
+ * @author dongyinggang
+ * @date 2020/10/14 8:07
+ */
+private void thisTest() {
+    //调用 当前类的localNumTest方法
+    System.out.println("4.测试lambda表达式中的this：");
+    IntConsumer thisTest = (a) -> this.thisMethod();
+    thisTest.accept(0);
+}
+
+/**
+ * thisMethod 方法是 配合thisTest测试lambda表达式中的this
+ *
+ * @author dongyinggang
+ * @date 2020/10/15 13:21
+ */
+private void thisMethod() {
+    System.out.println("调用了本类的thisMethod()方法");
+}
+```
+
+### lambda对自由变量的捕获
+
+先看示例代码
+
+```java
+private void repeatMessage(String text, int count) {
+    System.out.println("5.综合理解Lambda表达式的作用域");
+    Runnable r = () -> {
+        for (int i = 0; i < count; i++) {
+            System.out.println(text);
+            Thread.yield();
+        }
+    };
+
+    new Thread(r).start();
+}
+```
+
+方法入参text、count在lambda表达式中被使用，从打印结果看，在子线程开始执行前,repeatMessage方法已经调用结束，也就是说参数变量已消失。
+
+要了解lambda表达式依然能够使用这两个参数的原因，就需要更深入的了解lambda表达式
+
+一个lambda表达式包括三部分：
+
+1. 一段代码
+
+2. 参数
+
+3. 自由变量的值，这里的"自由"指的是那些不是lambda表达式参数并且未在lambda表达式中定义的变量,即外部变量
+
+ 在本方法中，lambda表达式有两个自由变量，text和count。分析代码可知，lambda表达式必须存储这两个值，才能够完成 repeatMessage 方法调用结束后的循环输出。
+
+可以理解为这两个值被lambda表达式捕获了（eg:捕获可以理解为lambda表达式是包含一个方法的对象，
+ 自由变量被复制到这个对象的实例变量中，且是 final 修饰的最终变量）。
+
 
 
 
 
 4、方法和构造函数引用
 
-5、Lamda 表达式作用域
+
 
 6、内置函数式接口
 
@@ -547,4 +616,4 @@ private void defaultMethodTest() {
 - [3]  [Java 8 新特性：Lambda 表达式](https://blog.csdn.net/sun_promise/article/details/51121205) ---非常详细的lambda详解
 - [4]  [Java 8 - lambda 捕获机制 ： 使用局部变量](https://blog.csdn.net/qq_15071263/article/details/102390699)
 - [5]  [学习Javascript闭包（Closure）](http://www.ruanyifeng.com/blog/2009/08/learning_javascript_closures.html)
-- 
+- [6]  [Java 8 新特性：Lambda 表达式的作用域（Lambda 表达式补充版）](https://blog.csdn.net/sun_promise/article/details/51132916)
