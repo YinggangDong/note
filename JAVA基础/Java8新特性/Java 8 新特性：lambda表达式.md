@@ -274,7 +274,7 @@ MyFunctionalInterface lambdaClass =
 lambdaClass.lambda();
 ```
 
-但实际在运行过程中可以发现，它的实质还是一个被简化的匿名内部类，尽管写作格式被简化，但实际运行中与匿名内部类无异。![image-20201012203525545](lambda表达式.assets/image-20201012203525545.png)
+但实际在运行过程中可以发现，它的实质还是一个被简化的匿名内部类，尽管写作格式被简化，但实际运行中与匿名内部类无异。![image-20201012203525545](图片/image-20201012203525545.png)
 
 其中四个实例对象都是通过lambda表达式实现函数式接口 MathOperation 的 operation(int a, int b) 方法的方式来进行声明的，从红框中可以看出，这里其实是生成了四个匿名类。冒号后面实际就是内部类的地址。
 
@@ -333,7 +333,7 @@ public interface IntConsumer {
 
 **局部变量非具final语义的最终变量：**
 
-![image-20201015182716113](lambda表达式.assets/image-20201015182716113.png)
+![image-20201015182716113](图片/image-20201015182716113.png)
 
 整体代码如下：
 
@@ -369,7 +369,7 @@ public interface IntConsumer {
 
 **list 和 tempObj 分别被重新赋值：**
 
-![image-20201015183439791](lambda表达式.assets/image-20201015183439791.png)
+![image-20201015183439791](图片/image-20201015183439791.png)
 
 整体代码如下：
 
@@ -430,11 +430,11 @@ public interface IntConsumer {
 
 **lambda表达式参数与局部变量重名：**
 
-![image-20201015182237629](lambda表达式.assets/image-20201015182237629.png)
+![image-20201015182237629](图片\image-20201015182237629.png)
 
 **lambda表达式中的局部变脸和外部变量重名：**
 
-![image-20201015182409066](lambda表达式.assets/image-20201015182409066.png)
+![image-20201015182409066](图片\image-20201015182409066.png)
 
 完整代码如下：
 
@@ -490,7 +490,7 @@ private void objectAndStaticTest() {
 
 lambda表达式不能够像匿名内部类一样直接调用接口的默认方法，以函数式接口 IntConsumer 为例，其 andThen 方法能够在匿名内部类的写法中在 accept 方法中被调用，但不能够在lambda表达式重写 accept 方法时进行调用。
 
-![image-20201016081749670](lambda表达式.assets/image-20201016081749670.png)
+![image-20201016081749670](图片/image-20201016081749670.png)
 
 整体代码如下：
 
