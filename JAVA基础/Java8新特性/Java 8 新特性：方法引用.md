@@ -4,7 +4,9 @@
 >
 > 当lambda表达式中只是执行一个方法调用时，不用lambda表达式，直接通过方法引用的形式可读性更高，方法引用本身就是一种更简洁易懂的Lambda表达式。
 >
-> 在方法引用中，离不开“：：”（double colon，双冒号）这个操作符。
+> 在方法引用中，离不开“::”（定界符、分隔符）这个操作符。
+
+[to]
 
 ## 应用场景
 
@@ -18,7 +20,112 @@
 
 “**::**” 是**域**操作符（也可以称作定界符、分隔符）。
 
+| 方法引用         | 等价的lambda表达式      |
+| ---------------- | ----------------------- |
+| String::valueOf  | x -> String.valueOf(x)  |
+| Object::toString | x -> x.toString()       |
+| x::toString      | () -> x.toString()      |
+| ArrayList::new   | () -> new ArrayList<>() |
 
+## 分类
+
+### 调用静态方法
+
+通过定界符调用静态方法时，和直接调用类的静态方法很像，以下面代码中的 Person 的静态方法 compareByAge 方法的调用为例，正常调用是 Person.compareByAge(a,b); 通过定界符调用则是 Person::compareByAge ，在这里实际是代替了 lambda 表达式 (a,b) -> Person.compareByage(a,b) 。
+
+参数列表是从接口 Comparator 的 compare 方法得到的。
+
+```java
+/**
+ * staticMethod 方法是 通过定界符 引用静态方法 ContainingClass::staticMethodName
+ * <p>
+ * 本例是引用Person类的 compareByAge 方法
+ *
+ * @author dongyinggang
+ * @date 2020/10/10 9:43
+ */
+private static void staticMethod() {
+				System.out.println("1.调用静态方法：");
+        List<Person> roster = Person.createRoster();
+        for (Person p : roster) {
+            p.printPerson();
+        }
+        Person[] rosterAsArray = roster.toArray(new Person[roster.size()]);
+				/**
+         * 4.调用已经存在的方法的最简形式
+         *
+         * 方法引用Person::compareByAge在语义上与lambda表达式相同(a, b) -> Person.compareByAge(a, b)。每个都有以下特征：
+         *
+         * - 它的形参列表是从复制Comparator<Person>.compare，这里是(Person, Person)。
+         * - 它的主体调用该方法Person.compareByAge。
+         */
+        Arrays.sort(rosterAsArray, Person::compareByAge);
+}
+
+```
+
+### 调用特定类型的实例方法
+
+通过“::”调用特定类型的实例方法时，特定类型指类实例，通过类实例调用其实例方法，作为lambda表达式的替代。
+
+```java
+		private static void particularObjInstanceMethod() {
+        System.out.println("2.调用特定对象的实例方法:");
+
+        List<Person> roster = Person.createRoster();
+        for (Person p : roster) {
+            p.printPerson();
+        }
+        Person[] rosterAsArray = roster.toArray(new Person[roster.size()]);
+        Person[] rosterAsArray1 = rosterAsArray.clone();
+
+        /**
+         * 1.使用Comparator的实现类作为比较器
+         *
+         * 声明comparator时必须用Comparator<Person> ，不能是Comparator，否则编译期报错
+         * wrong 1st argument type  Found Person[] required T[]
+         * 意指rosterAsArray参数不满足sort方法的参数类型，默认参数类型是泛型T[] 而非实际类型Person[]
+         *
+         * 当comparator未指明其泛型的类型时，尽管其使用实现类进行实例化，编译期也不能通过这种隐式的关系推断出
+         * 实际类型，因此期望入参是T[]
+         *
+         * 当比较器的泛型被显式的指明为Person时，这时sort方法会期望两个参数分别为
+         * Person[]和Comparator<Person> c
+         *
+         * 疑问：
+         * 1. Arrays.sort方法的参数类型jre推断过程是如何的？是通过比较器的泛型的实际类型来推断么？
+         *  -- Java8中对Lambda表达式中方法参数的类型推断（一） ：https://blog.csdn.net/u013096088/article/details/69367260
+         */
+        Comparator<Person> comparator = new ComparatorImpl();
+        Arrays.sort(rosterAsArray1, comparator::compare);
+        //作为Comparator的实现类,可以简写为以下形式，上面的方式实际在运行过程中会生成匿名类
+        Arrays.sort(rosterAsArray1, comparator);
+        /**
+         * 2.引用一个普通类的方法作为比较器
+         *
+         * 通过双冒号引用特定对象 comparatorProvider 的实例方法 compareByAge
+         * 如果直接使用 ComparatorProvider::compareByAge 会提示在 static 上下文中调用非静态方法
+         */
+        ComparatorProvider comparatorProvider = new ComparatorProvider();
+        Person[] rosterAsArray2 = rosterAsArray.clone();
+        Arrays.sort(rosterAsArray2, comparatorProvider::compareByAge);
+        System.out.println("排序完成：");
+        for (Person person : rosterAsArray2) {
+            person.printPerson();
+        }
+
+    }
+    
+/**
+ * 含compareByAge方法的类
+ */
+class ComparatorProvider {
+
+    public int compareByAge(Person a, Person b) {
+        return a.getBirthday().compareTo(b.getBirthday());
+    }
+}
+```
 
 ## 参考内容
 
