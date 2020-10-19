@@ -599,16 +599,6 @@ private void repeatMessage(String text, int count) {
 
 
 
-
-
-4、方法和构造函数引用
-
-
-
-6、内置函数式接口
-
-7、Optionals
-
 ## 参考内容
 
 - [1]  [Lambda表达式和函数式接口](https://www.cnblogs.com/gclokok/p/10941002.html)
