@@ -111,9 +111,188 @@ public class FunctionalInterfaceTest {
 }
 ```
 
-## 常见的函数式接口
+## 内置函数式接口
 
-### 1. Comparator接口
+### 核心内置函数接口
+
+#### 1. Consumer接口-消费型接口
+
+通常重写其accept(T)方法用于在forEach(Consumer<? super T> action)中进行对list中元素的操作。有参数，无返回值，只是对参数进行了一定的处理。
+
+实例如下：
+
+```java
+/**
+ * lambdaErgodic 方法是 lambda方式进行遍历
+ *
+ * @param list 要遍历的list对象
+ * @author dongyinggang
+ * @date 2020/9/9 10:59
+ */
+private static void lambdaErgodic(List<String> list){
+    /*
+     * 使用 lambda 表达式以及函数操作(functional operation),
+     * foreach的参数是Consumer<? super T>
+     * Consumer是JDK提供的一个函数式编程接口，其待实现方法是accept方法，
+     * 除此之外还有一个default修饰的andThen方法（函数式接口只能有一个未实现方法）
+     *
+     * 下面的示例就是通过lambda表达式实现了accept方法
+     */
+    System.out.println("lambda表达式简写版：");
+    list.forEach((s) -> System.out.print(s + "->"));
+    System.out.println();
+
+    //上下两者等价,下面实际是匿名内部类
+    System.out.println("匿名内部类版：");
+    list.forEach(new Consumer<String>() {
+        @Override
+        public void accept(String s) {
+            System.out.print(s + "->");
+        }
+    });
+    System.out.println();
+
+    //在 Java 8 中使用双冒号操作符(double colon operator)
+    System.out.println("lambda表达式+双冒号操作符版：");
+    list.forEach(System.out::print);
+    System.out.println();
+}
+```
+
+#### 2. Supplier<T>：供给型接口（T get（））
+
+只有返回值，没有入参。可以用来产生随机数等不需要输入的场景。
+
+```java
+/**
+ * SupplierDemo 类是 内置函数式接口-Supplier<T>：供给型接口（T get（））
+ *
+ * @author dongyinggang
+ * @date 2020-10-19 20:19
+ **/
+public class SupplierDemo {
+
+    public static void main(String[] args) {
+        SupplierDemo supplierDemo = new SupplierDemo();
+        Random ran = new Random();
+        List<Integer> list = supplierDemo.supplier(10, () -> ran.nextInt(10));
+
+        for (Integer i : list) {
+            System.out.println(i);
+        }
+    }
+
+    /**
+     * 随机产生sum个数量得集合
+     * @param sum 集合内元素个数
+     * @param sup Supplier接口
+     * @return 随机产生的集合
+     */
+    private List<Integer> supplier(int sum, Supplier<Integer> sup){
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < sum; i++) {
+            list.add(sup.get());
+        }
+        return list;
+    }
+}
+```
+#### 3. Function<T, R>：函数型接口（R apply（T t））
+
+既有入参，又有出参，传入的入参经过处理后得到出参， 入参出参的类型可以有别,也可以一致。
+
+示例如下：
+
+```java
+/**
+ * FunctionDemo 类是 内置函数式接口-Function<T, R>：函数型接口（R apply（T t））
+ * 既有入参，又有出参，传入的入参经过处理后得到出参
+ * 入参出参的类型可以有别,也可以一致
+ *
+ * @author dongyinggang
+ * @date 2020-10-19 20:30
+ **/
+public class FunctionDemo {
+
+    private static final int SIX = 6;
+
+    public static void main(String[] args) {
+        FunctionDemo functionDemo = new FunctionDemo();
+        //重写apply方法,获取工单后六位的编号
+        Integer wrNum = functionDemo.function("FXGD20201019100001",
+                (wrCode) -> Integer.valueOf(wrCode.substring(wrCode.length() - SIX))
+        );
+        System.out.println("当前工单编号" + wrNum);
+    }
+
+    /**
+     * function 方法是 获取工单号的当前生成编号
+     *
+     * @param wrCode   工单号 “前缀+日期+6位编号”
+     * @param function 待重写apply方法的Function接口
+     * @return 6位编号的int值
+     * @author dongyinggang
+     * @date 2020/10/19 20:35
+     */
+    private Integer function(String wrCode, Function<String, Integer> function) {
+        return function.apply(wrCode);
+    }
+```
+
+#### 4. Predicate<T>：断言型接口（boolean test（T t））
+
+输入一个参数,输出一个boolean类型的返回值判断是否满足要求。
+
+示例如下：
+
+```java
+/**
+ * PredicateDemo 类是 内置函数式接口-Predicate<T>：断言型接口（boolean test（T t））
+ *  输入一个参数,输出一个boolean类型的返回值判断是否满足要求
+ * @author dongyinggang
+ * @date 2020-10-19 20:43
+ **/
+public class PredicateDemo {
+
+    /**
+     * 断言型接口：Predicate<T>
+     */
+    public static void main(String[] args) {
+        List<Integer> list = new ArrayList<>();
+        list.add(102);
+        list.add(172);
+        list.add(13);
+        list.add(82);
+        list.add(109);
+        //通过重写lambda重写test方法,过滤小于100的数
+        List<Integer> newList = filterInt(list, x -> (x > 100));
+        for (Integer integer : newList) {
+            System.out.println(integer);
+        }
+    }
+
+    /**
+     * 过滤集合
+     * @param list 要遍历的list
+     * @param pre 待重写test方法的Predicate接口
+     * @return 过滤后的集合
+     */
+    private static List<Integer> filterInt(List<Integer> list, Predicate<Integer> pre){
+        List<Integer> newList = new ArrayList<>();
+        for (Integer integer : list) {
+            //如果满足重写之后的test方法,则将元素add到newList中
+            if (pre.test(integer)){
+                newList.add(integer);
+            }
+        }
+        return newList;
+    }
+}
+```
+
+### 其他常见内置函数式接口
+
+#### 1. Comparator接口-比较器借口
 
 通常重写其 int compare(T o1, T o2) 方法用于 Arrays.sort(T[] a, Comparator<? super T> c) 中作为比较器进行排序。
 
@@ -208,51 +387,7 @@ private static void staticMethod() {
 }
 ```
 
-### 2. Consumer接口
-
-通常重写其accept(T)方法用于在forEach(Consumer<? super T> action)中进行对list中元素的操作。
-
-实例如下：
-
-```java
-/**
- * lambdaErgodic 方法是 lambda方式进行遍历
- *
- * @param list 要遍历的list对象
- * @author dongyinggang
- * @date 2020/9/9 10:59
- */
-private static void lambdaErgodic(List<String> list){
-    /*
-     * 使用 lambda 表达式以及函数操作(functional operation),
-     * foreach的参数是Consumer<? super T>
-     * Consumer是JDK提供的一个函数式编程接口，其待实现方法是accept方法，
-     * 除此之外还有一个default修饰的andThen方法（函数式接口只能有一个未实现方法）
-     *
-     * 下面的示例就是通过lambda表达式实现了accept方法
-     */
-    System.out.println("lambda表达式简写版：");
-    list.forEach((s) -> System.out.print(s + "->"));
-    System.out.println();
-
-    //上下两者等价,下面实际是匿名内部类
-    System.out.println("匿名内部类版：");
-    list.forEach(new Consumer<String>() {
-        @Override
-        public void accept(String s) {
-            System.out.print(s + "->");
-        }
-    });
-    System.out.println();
-
-    //在 Java 8 中使用双冒号操作符(double colon operator)
-    System.out.println("lambda表达式+双冒号操作符版：");
-    list.forEach(System.out::print);
-    System.out.println();
-}
-```
-
-### 3. Runnable接口
+#### 2. Runnable接口
 
 通常通过重写Runnable接口的run()方法进行线程功能的设置，然后通过new Thread(Runnable target)进行线程的创建。
 
@@ -294,9 +429,12 @@ public class LambdaRunnable {
 }
 ```
 
+
+
 ## 参考内容
 
 - [1]  [JDK8新特性：函数式接口@FunctionalInterface的使用说明](https://blog.csdn.net/aitangyong/article/details/54137067)
 - [2]  [函数式接口](https://www.jianshu.com/p/8005f32caf3d)
 - [3]  [Lambda表达式和函数式接口](https://www.cnblogs.com/gclokok/p/10941002.html)
 - [4]  [Java 8 新特性：Lambda 表达式](https://blog.csdn.net/sun_promise/article/details/51121205)
+- [5]  [java8新特性——四大内置核心函数式接口](https://www.cnblogs.com/wuyx/p/9000312.html)
