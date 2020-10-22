@@ -6,7 +6,7 @@
 
 ## 概述
 
-Optional类在java.util包中，是Java8引入的
+Optional 的完整路径是 java.util.Optional，使用它是为了避免代码中的 if (obj != null) { } 这样范式的代码，可以采用链式编程的风格。而且通过 Optional 中提供的 filter 方法可以判断对象是否符合条件，在符合条件的情况下才会返回，map 方法可以在返回对象前修改对象中的属性。
 
 ## Optional源码
 
@@ -180,3 +180,10 @@ public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSuppli
 }
 ```
 
+## 实际应用
+
+## 参考内容
+
+- [1]  [Java8学习笔记（六）--Optional](https://www.cnblogs.com/yw0219/p/7354938.html)
+
+- [2]  [Optional是个好东西，你会用么？（全面深度解析）](https://blog.csdn.net/DBC_121/article/details/104984093)
