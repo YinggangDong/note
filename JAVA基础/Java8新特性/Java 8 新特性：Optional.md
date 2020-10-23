@@ -10,7 +10,7 @@ Optional 的完整路径是 java.util.Optional，使用它是为了避免代码�
 
 ## Optional源码
 
-### 1. Optional 的属性
+### 1 Optional 的属性
 
 ```java
 /**
@@ -179,8 +179,6 @@ public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSuppli
     }
 }
 ```
-
-## 实际应用
 
 ## 参考内容
 
