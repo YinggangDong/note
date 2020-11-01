@@ -114,6 +114,10 @@ F:\ideaWorkSpace\YinggangDong.github.io\testblog>jekyll serve
 
 进入 [jekyll官方主题](http://jekyllthemes.org/) 页面，进行主题的选择。
 
+我在github上找了个 fork 较高的 jekyll主题 [minimal-mistakes](https://github.com/mmistakes/minimal-mistakes) 
+
+需改一些配置项等才能够使用。
+
 
 
 ## 参考内容
