@@ -8,6 +8,39 @@
 
 
 
+## 实际应用 
+
+### localDateTime 与 Date的相互转换
+
+```java
+		/**
+     * convertLocalDateTime 方法是 Date转化为LocalDateTime
+     *
+     * @param date 入参是Date对象
+     * @return LocalDateTime对象
+     * @author dongyinggang
+     * @date 2020/10/30 14:05
+     */
+    public static LocalDateTime date2LocalDateTime(Date date){
+        //指定时区为当前系统时区
+        ZoneId zoneId = ZoneId.systemDefault();
+        //获取当前时区的LocalDateTime对象
+        return LocalDateTime.ofInstant(date.toInstant(),zoneId);
+    }
+
+    /**
+     * localDateTime2Date 方法是 LocalDateTime 转化为 Date
+     *
+     * @param localDateTime LocalDateTime对象
+     * @return Date对象
+     * @author dongyinggang
+     * @date 2020/11/4 10:29
+     */
+    public static Date localDateTime2Date(LocalDateTime localDateTime){
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+```
+
 
 
 ## 参考内容
