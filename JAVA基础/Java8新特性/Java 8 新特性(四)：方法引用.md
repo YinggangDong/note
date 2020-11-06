@@ -1,4 +1,4 @@
-# Java 8 新特性：方法引用
+# Java 8 新特性(四)：方法引用
 
 > 方法引用是用来直接访问类或者实例的已经存在的方法或者构造方法。
 >
@@ -331,4 +331,4 @@ DEST transferElements(SOURCE sourceCollection,Supplier<DEST> collectionFactory) 
 ## 参考内容
 
 - [1]  [Java 8 新特性：Lambda 表达式之方法引用（Lambda 表达式补充版）](https://blog.csdn.net/sun_promise/article/details/51190256)
-- [2]  [Java8新特性之二：方法引用](https://www.cnblogs.com/wuhenzhidu/p/10727065.html)
+- [2]  [Java8新特性之二：方法引用](https://www.cnblogs.com/wuhenzhidu/p/10727065.html)

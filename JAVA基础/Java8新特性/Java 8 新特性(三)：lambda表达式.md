@@ -1,4 +1,4 @@
-# Java 8 新特性：lambda表达式
+# Java 8 新特性(三)：lambda表达式
 
 [toc]
 
