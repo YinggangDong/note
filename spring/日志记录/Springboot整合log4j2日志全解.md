@@ -12,8 +12,6 @@
 
 
 
-## 
-
 ## 1 常用日志框架
 
 - java.util.logging：是JDK在1.4版本中引入的Java原生日志框架
