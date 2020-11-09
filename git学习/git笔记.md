@@ -1,2 +1,352 @@
 # git笔记
 
+[toc]
+
+
+
+## 1.git remote 远程分支管理
+
+1.git remote 不带参数，列出已经存在的远程分支
+
+```sh
+$ git remote
+origin
+```
+
+2.git remote -v | --verbose
+
+列出详细信息，在每一个名字后面列出其远程url，此时， -v 选项(译注:此为 –verbose 的简写,取首字母),显示对应的克隆地址。
+
+```sh
+$ git remote -v
+origin  https://github.com/YinggangDong/rabbitmq.git (fetch)
+origin  https://github.com/YinggangDong/rabbitmq.git (push)
+```
+
+3.git remote add url 添加一个远程仓库
+
+```sh
+$ git remote add origin https://github.com/YinggangDong/Multiprocessor.git
+```
+
+4.解除本地项目和远程库的关联
+
+```sh
+git remote remove 远端仓库名称(origin)
+```
+
+## 2.git branch 分支管理
+
+1.查看当前分支列表
+
+```sh
+$ git branch
+* dev0.1
+  dev0.2
+  dev0.3
+  master
+  
+```
+
+其中带“*”号标识的是当前分支。
+
+2.分支创建
+
+共两种方式，通过 git branch [分支名] 或者 git checkout -b [分支名] 来进行分支的新建
+
+```sh
+1.git branch [分支名]
+$ git branch dev0.4
+
+2.git checkout -b [分支名]
+$ git checkout -b dev0.5
+Switched to a new branch 'dev0.5'
+
+```
+
+3.分支的切换
+
+通过 git checkout 进行分支的切换
+
+```sh
+git checkout [分支名]
+
+$ git checkout dev0.2
+Switched to branch 'dev0.2'
+```
+
+4.分支的删除
+
+通过 git branch -d [分支名] 进行分支的删除
+
+```sh
+$ git branch -d dev0.5
+Deleted branch dev0.5 (was c4085d0).
+```
+
+5.设置项目的默认pull 和 push的远程分支
+
+通过 git branch --set-upstream-to 属性的设置，可以设置项目的默认pull和push的远程分支
+
+```sh
+$ git branch --set-upstream-to=origin/master master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+```
+
+6.将分支推送至远程
+
+通过 git push origin [branch] 可以将分支推送至远端的仓库，若不推送，则该分支是仅自己可见的，别人不可见。推送至远端后，所有人都可见。 
+
+```sh
+$ git push origin dev0.4
+Total 0 (delta 0), reused 0 (delta 0)
+remote:
+remote: Create a pull request for 'dev0.4' on GitHub by visiting:
+remote:      https://github.com/YinggangDong/security/pull/new/dev0.4
+remote:
+To https://github.com/YinggangDong/security.git
+ * [new branch]      dev0.4 -> dev0.4
+
+```
+
+## 3.更新与合并
+
+1.更新并合并当前分支的最新改动
+
+要更新本地仓库的代码至本分支的最新，需要执行 git pull 命令。git pull 命令是 **获取（fetch）**并 **合并（merge）**远端的改动。
+
+```sh
+$ git pull
+Already up to date.
+```
+
+2.合并其他分支改动至当前分支
+
+想要将其他分支的改动拉取到当前分支时，可以通过 git merge 指令完成，git 会尝试自动合并改动，成功则如下显示：
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
+$ git checkout dev0.1
+Switched to branch 'dev0.1'
+
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (dev0.1)
+$ git merge master
+Updating c4085d0..198706a
+Fast-forward
+ com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java | 1 +
+ 1 file changed, 1 insertion(+)
+	
+```
+
+3.处理冲突
+
+在团队合作开发中，1和2的操作并非每次都会成功，若存在两个或更多人编辑了同一段代码，就会出现**冲突（conflicts）**。这时候就需要手动合并这些冲突了。
+
+如下模拟了2中出现冲突的情况。
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
+$ git merge dev0.1
+Auto-merging com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
+CONFLICT (content): Merge conflict in com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+提示自动合并过程发现DH.java文件中存在冲突，因此自动合并失败，需要修复冲突然后提交修复结果。
+
+这时候，回到文件中就可以发现，冲突的地方出现了两个分支中的不同内容，分别是当前分支的 HEAD 版本和要合并过来的 dev0.1 分支对这段注释的修改内容。
+
+```java
+/**
+ * DH:密钥交换协议/算法(Diffie-Hellman Key Exchange/Agreement Algorithm)
+ *
+ * @author Lee Xiang
+ * @date 2020/10/21 13:36
+<<<<<<< HEAD
+ * master分支
+=======
+ * master分支  
+>>>>>>> dev0.1
+ **/
+ public class DH {
+ }
+```
+
+根据实际情况，进行该段内容的修复，我这里保留自己的最新改动，将 dev0.1 分支的改动拒绝掉。<font color='red'>实际开发过程中不能够如此粗暴的处理，而应该是根据实际情况合并不同的业务代码，保证所有的正确改动都被保留。</font>
+
+合并完成后，需要通过 git add [文件名] 将合并结果add进去。
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master|MERGING)
+$ git add com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
+```
+
+然后在进行 git commit 提交合并结果，和普通的 commit 的区别是，不能够有文件名或者.出现。
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master|MERGING)
+$ git commit . -m "合并master和dev0.1"
+fatal: cannot do a partial commit during a merge.
+
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master|MERGING)
+$ git commit -m "合并master和dev0.1"
+[master 7f03829] 合并master和dev0.1
+
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
+$
+```
+
+可以看到，如果加上“.”进行提交，会提示处于 merge 状态不能够进行这样的 commit ，去掉 “.”之后就可以正常commit ,可以看到 commit 成功后，master|后面的 MERGING 标识已经消失，代表本次合并已经完成。
+
+4.预览差异
+
+在合并之前，可以通过 git diff [源分支] [目标分支] 的命令查看两个分支的差异。
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master|MERGING)
+$ git diff dev0.1 master
+diff --git a/com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java b/com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
+index c0b1391..467ec3b 100644
+--- a/com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
++++ b/com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
+@@ -20,7 +20,7 @@ import java.util.Objects;
+  *
+  * @author Lee Xiang
+  * @date 2020/10/21 13:36
+- * master分支
++ * master分支
+  **/
+ public class DH {
+     private static String src = "jdk security dh";
+```
+
+
+
+## 4.提交
+
+1.提交本地修改至本地仓库
+
+通过 git commit [文件名或.（代表所有改动）] -m “提交说明内容” 进行修改的提交。
+
+```sh
+$ git commit . -m "feat:添加注释"
+[master 556c9e4] feat:添加注释
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
+如果不写 -m “提交说明内容”，会进入一个vim编辑器，可以在里面进行提交内容的填写，然后点击 esc 退出编辑模式，输入 i 进入编辑模式，退出编辑模式后，输入两个大写Z可以退出该vim编辑器，成功进行提交。
+
+```SH
+$ git commit .
+
+此时会进入如下vim编辑器
+
+feat:新增注释
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch master
+# Your branch is ahead of 'origin/master' by 3 commits.
+#   (use "git push" to publish your local commits)
+#
+# Changes to be committed:
+#       modified:   com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
+#
+# Untracked files:
+#       .idea/
+#       security.iml
+#       target/
+#
+~
+~
+~
+~
+~
+~
+F:/GitHub/security/.git/COMMIT_EDITMSG[+] [unix] (19:10 09/11/2020) 1,18-14 全部
+-- 插入 --
+
+退出编辑模式，双击大写Z，可以进行保存，保存后显示如下：
+
+$ git commit .
+[master 198706a] feat:新增注释
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+```
+
+## 5.日志
+
+通过 git log 指令可以看到 git 的提交记录，如果运行 git log，可以看到如下输出
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
+$ git log
+commit 7f038293b43e6f78638b387a053148decffe0259 (HEAD -> master)
+Merge: 06345fd 9d0f8d3
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:34:25 2020 +0800
+
+    合并master和dev0.1
+
+commit 06345fd0e70cf9678b442113d3bd354841aa17f1
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:17:14 2020 +0800
+
+    格式化代码
+
+commit 9d0f8d37cca55bbd3432465a97040cd0501ee2f3 (dev0.1)
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:15:27 2020 +0800
+
+    增加注释
+
+commit 198706ad8c392df8c547d70b0c55a445a9789447
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:10:11 2020 +0800
+```
+
+默认不用任何参数的话，git log 会按提交时间列出所有的更新，最近的更新排在最上面。看到了吗，每次更新都有一个 SHA-1 校验和、作者的名字和电子邮件地址、提交时间，最后缩进一个段落显示提交说明。
+
+我们常用 -p 选项展开显示每次提交的内容差异，用 -2 则仅显示最近的两次更新：
+
+
+
+```
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
+git log -p
+commit 7f038293b43e6f78638b387a053148decffe0259 (HEAD -> master)
+Merge: 06345fd 9d0f8d3
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:34:25 2020 +0800
+
+    合并master和dev0.1
+
+commit 06345fd0e70cf9678b442113d3bd354841aa17f1
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:17:14 2020 +0800
+
+    格式化代码
+
+diff --git a/com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java b/com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
+index a237719..467ec3b 100644
+--- a/com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
++++ b/com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java
+@@ -20,7 +20,7 @@ import java.util.Objects;
+  *
+  * @author Lee Xiang
+  * @date 2020/10/21 13:36
+- * master分支
+
+```
+
+
+
+
+
+## 参考内容
+
+[1] [git - 简明指南](http://rogerdudler.github.io/git-guide/index.zh.html)
+
+[2] [你知道如何查看git的log吗？](https://blog.csdn.net/lshemail/article/details/51787250)
+
+[3] [IDEA 设置项目的默认pull 和 push的远程分支](https://blog.csdn.net/sgl520lxl/article/details/88425324)
