@@ -1,4 +1,4 @@
-# Java 8  新特性(六)：Stream类
+# Java 8 新特性(六)：Stream类
 
 [TOC]
 
