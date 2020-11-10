@@ -495,7 +495,7 @@ $ git log --since=2.weeks
 
 来看一个实际的例子，如果要查看 Git 仓库中，2008 年 10 月期间，Junio Hamano 提交的但未合并的测试脚本（位于项目的 t/ 目录下的文件），可以用下面的查询命令：
 
-```
+```sh
 $ git log --pretty="%h - %s" --author=gitster --since="2008-10-01" \
    --before="2008-11-01" --no-merges -- t/
 5610e3b - Fix testcase failure when extended attribute
