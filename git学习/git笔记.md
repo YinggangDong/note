@@ -307,11 +307,11 @@ Date:   Mon Nov 9 19:10:11 2020 +0800
 
 默认不用任何参数的话，git log 会按提交时间列出所有的更新，最近的更新排在最上面。看到了吗，每次更新都有一个 SHA-1 校验和、作者的名字和电子邮件地址、提交时间，最后缩进一个段落显示提交说明。
 
-我们常用 -p 选项展开显示每次提交的内容差异，用 -2 则仅显示最近的两次更新：
+1.通过 -p 查看每次提交的内容差异
 
+我们常用 -p 选项展开显示每次提交的内容差异：
 
-
-```
+```sh
 dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
 git log -p
 commit 7f038293b43e6f78638b387a053148decffe0259 (HEAD -> master)
@@ -339,7 +339,97 @@ index a237719..467ec3b 100644
 
 ```
 
+2.用 -1 则只显示最近一次更新
 
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
+$ git log -1
+commit 7f038293b43e6f78638b387a053148decffe0259 (HEAD -> master, origin/master)
+Merge: 06345fd 9d0f8d3
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:34:25 2020 +0800
+
+    合并master和dev0.1
+	
+```
+
+3.用 --stat仅显示简要的修改行数统计
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
+$ git log --stat
+commit 7f038293b43e6f78638b387a053148decffe0259 (HEAD -> master, origin/master)
+Merge: 06345fd 9d0f8d3
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:34:25 2020 +0800
+
+    合并master和dev0.1
+
+commit 06345fd0e70cf9678b442113d3bd354841aa17f1
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:17:14 2020 +0800
+
+    格式化代码
+
+ com/snbc/java/asymmetricEncryptionAlgorithm/DH/DH.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9d0f8d37cca55bbd3432465a97040cd0501ee2f3 (dev0.1)
+Author: YinggangDong <believerD@aliyun.com>
+Date:   Mon Nov 9 19:15:27 2020 +0800
+
+```
+
+4. --pretty用来设置不同于默认格式的方式
+
+还有个常用的 –pretty 选项，可以指定使用完全不同于默认格式的方式展示提交历史。比如用 oneline 将每个提交放在一行显示，这在提交数很大时非常有用。另外还有 short(隐藏时间)，full（含author信息和commit信息，多了个commit信息，少了个Date信息） 和 fuller（有author、authorDate、commit、commitDate） 可以用，展示的信息或多或少有些不同，请自己动手实践一下看看效果如何。
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
+$ git log --pretty=oneline
+7f038293b43e6f78638b387a053148decffe0259 (HEAD -> master, origin/master) 合并master和dev0.1
+06345fd0e70cf9678b442113d3bd354841aa17f1 格式化代码
+9d0f8d37cca55bbd3432465a97040cd0501ee2f3 (dev0.1) 增加注释
+198706ad8c392df8c547d70b0c55a445a9789447 feat:新增注释
+e1d033f757c2570e4094648317df9faa3c7bf058 feat:增加注释
+556c9e46b8c01ad0f45ef951e3f67219ffdb18c4 feat:添加注释
+28c6e98d56a092ab01b9592f289ddfff887e4426 style:增加master分支标记
+c4085d04fdbb1f9f912a6a372fe032a667f3bc40 (origin/dev0.4, origin/dev0.1, dev0.4, dev0.3, dev0.2) style:格式化代码
+b9b0c3a1039c61df32f1db5b4a712153db706c45 style:修改格式
+760e0ce3718b45b1ff93df525dfa0ede1d7173aa style:修改格式
+d2e59d8316c8192f695b17bf1eaca104686a1812 style:修改格式
+e787f139cd1bb5de21081fc4d995f10b10c15a7f style:修改格式
+01ce025cfb697a21dc35caf15c669627a1061a6d feat:增加忽略文件等
+2b6f91d20ba3284562e378b1d0b8516eb803fcb3 feat:项目初始化
+
+```
+
+还有一种比较特别的模式是format，命令形如 
+
+```sh
+$ git log --pretty=format:"%h - %an, %ar : %s"	
+```
+
+效果如下：
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
+$ git log --pretty=format:"%h - %an, %ar : %s"
+7f03829 - YinggangDong, 13 hours ago : 合并master和dev0.1
+06345fd - YinggangDong, 13 hours ago : 格式化代码
+9d0f8d3 - YinggangDong, 13 hours ago : 增加注释
+198706a - YinggangDong, 13 hours ago : feat:新增注释
+e1d033f - YinggangDong, 13 hours ago : feat:增加注释
+556c9e4 - YinggangDong, 14 hours ago : feat:添加注释
+28c6e98 - YinggangDong, 14 hours ago : style:增加master分支标记
+c4085d0 - YinggangDong, 14 hours ago : style:格式化代码
+b9b0c3a - YinggangDong, 14 hours ago : style:修改格式
+760e0ce - YinggangDong, 14 hours ago : style:修改格式
+d2e59d8 - YinggangDong, 14 hours ago : style:修改格式
+e787f13 - YinggangDong, 14 hours ago : style:修改格式
+01ce025 - YinggangDong, 3 days ago : feat:增加忽略文件等
+2b6f91d - YinggangDong, 3 days ago : feat:项目初始化
+```
 
 
 
