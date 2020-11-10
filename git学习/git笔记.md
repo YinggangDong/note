@@ -307,7 +307,7 @@ Date:   Mon Nov 9 19:10:11 2020 +0800
 
 默认不用任何参数的话，git log 会按提交时间列出所有的更新，最近的更新排在最上面。看到了吗，每次更新都有一个 SHA-1 校验和、作者的名字和电子邮件地址、提交时间，最后缩进一个段落显示提交说明。
 
-1.通过 -p 查看每次提交的内容差异
+### 1.通过 -p 查看每次提交的内容差异
 
 我们常用 -p 选项展开显示每次提交的内容差异：
 
@@ -339,7 +339,7 @@ index a237719..467ec3b 100644
 
 ```
 
-2.用 -1 则只显示最近一次更新
+### 2.用 -1 则只显示最近一次更新
 
 ```sh
 dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
@@ -353,7 +353,7 @@ Date:   Mon Nov 9 19:34:25 2020 +0800
 	
 ```
 
-3.用 --stat仅显示简要的修改行数统计
+### 3.用 --stat仅显示简要的修改行数统计
 
 ```sh
 dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/security (master)
@@ -380,7 +380,7 @@ Date:   Mon Nov 9 19:15:27 2020 +0800
 
 ```
 
-4. --pretty用来设置不同于默认格式的方式
+### 4.--pretty用来设置不同于默认格式的方式
 
 还有个常用的 –pretty 选项，可以指定使用完全不同于默认格式的方式展示提交历史。比如用 oneline 将每个提交放在一行显示，这在提交数很大时非常有用。另外还有 short(隐藏时间)，full（含author信息和commit信息，多了个commit信息，少了个Date信息） 和 fuller（有author、authorDate、commit、commitDate） 可以用，展示的信息或多或少有些不同，请自己动手实践一下看看效果如何。
 
@@ -404,7 +404,7 @@ e787f139cd1bb5de21081fc4d995f10b10c15a7f style:修改格式
 
 ```
 
-还有一种比较特别的模式是format，命令形如 
+还有一种比较特别的模式是format，可以定制要显示的记录格式，这样的输出便于后期编程提取分析,命令形如 
 
 ```sh
 $ git log --pretty=format:"%h - %an, %ar : %s"	
@@ -431,7 +431,82 @@ e787f13 - YinggangDong, 14 hours ago : style:修改格式
 2b6f91d - YinggangDong, 3 days ago : feat:项目初始化
 ```
 
+下面列出了常用的格式占位符写法及其代表的意义。
 
+```sh
+%H  提交对象（commit）的完整哈希字串
+%h  提交对象的简短哈希字串
+%T  树对象（tree）的完整哈希字串
+%t  树对象的简短哈希字串
+%P  父对象（parent）的完整哈希字串
+%p  父对象的简短哈希字串
+%an 作者（author）的名字
+%ae 作者的电子邮件地址
+%ad 作者修订日期（可以用 -date= 选项定制格式）
+%ar 作者修订日期，按多久以前的方式显示
+%cn 提交者(committer)的名字
+%ce 提交者的电子邮件地址
+%cd 提交日期
+%cr 提交日期，按多久以前的方式显示
+%s  提交说明
+```
+
+你一定奇怪*作者（author）*和*提交者（committer）*之间究竟有何差别，其实作者指的是实际作出修改的人，提交者指的是最后将此工作成果提交到仓库的人。所以，当你为某个项目发布补丁，然后某个核心成员将你的补丁并入项目时，你就是作者，而那个核心成员就是提交者。
+
+列出了一些其他常用的选项及其释义。以下是
+
+```
+-p  按补丁格式显示每个更新之间的差异。
+--stat  显示每次更新的文件修改统计信息。
+--shortstat 只显示 --stat 中最后的行数修改添加移除统计。
+--name-only 仅在提交信息后显示已修改的文件清单。
+--name-status   显示新增、修改、删除的文件清单。
+--abbrev-commit 仅显示 SHA-1 的前几个字符，而非所有的 40 个字符。
+--relative-date 使用较短的相对时间显示（比如，“2 weeks ago”）。
+--graph 显示 ASCII 图形表示的分支合并历史。
+--pretty    使用其他格式显示历史提交信息。可用的选项包括 oneline，short，full，fuller 和 format（后跟指定格式）。
+```
+
+### 5.限制输出长度
+
+除了定制输出格式的选项之外，git log 还有许多非常实用的限制输出长度的选项，也就是只输出部分提交信息。之前我们已经看到过 -2 了，它只显示最近的两条提交，实际上，这是 - 选项的写法，其中的 n 可以是任何自然数，表示仅显示最近的若干条提交。不过实践中我们是不太用这个选项的，Git 在输出所有提交时会自动调用分页程序（less），要看更早的更新只需翻到下页即可。
+
+另外还有按照时间作限制的选项，比如 –since 和 –until。下面的命令列出所有最近两周内的提交：
+
+```sh
+$ git log --since=2.weeks
+```
+
+你可以给出各种时间格式，比如说具体的某一天（“2008-01-15”），或者是多久以前（“2 years 1 day 3 minutes ago”）。
+
+还可以给出若干搜索条件，列出符合的提交。用 –author 选项显示指定作者的提交，用 –grep 选项搜索提交说明中的关键字。（请注意，如果要得到同时满足这两个选项搜索条件的提交，就必须用 –all-match 选项。否则，满足任意一个条件的提交都会被匹配出来）
+
+另一个真正实用的git log选项是路径(path)，如果只关心某些文件或者目录的历史提交，可以在 git log 选项的最后指定它们的路径。因为是放在最后位置上的选项，所以用两个短划线（–）隔开之前的选项和后面限定的路径名。
+
+下面还列出了其他常用的类似选项。
+
+```
+-(n)    仅显示最近的 n 条提交
+--since, --after    仅显示指定时间之后的提交。
+--until, --before   仅显示指定时间之前的提交。
+--author    仅显示指定作者相关的提交。
+--committer 仅显示指定提交者相关的提交。
+```
+
+来看一个实际的例子，如果要查看 Git 仓库中，2008 年 10 月期间，Junio Hamano 提交的但未合并的测试脚本（位于项目的 t/ 目录下的文件），可以用下面的查询命令：
+
+```
+$ git log --pretty="%h - %s" --author=gitster --since="2008-10-01" \
+   --before="2008-11-01" --no-merges -- t/
+5610e3b - Fix testcase failure when extended attribute
+acd3b9e - Enhance hold_lock_file_for_{update,append}()
+f563754 - demonstrate breakage of detached checkout wi
+d1a43f2 - reset --hard/read-tree --reset -u: remove un
+51a94af - Fix "checkout --track -b newbranch" on detac
+b0ad11e - pull: allow "git pull origin $something:$cur"
+```
+
+Git 项目有 20,000 多条提交，但我们给出搜索选项后，仅列出了其中满足条件的 6 条。
 
 ## 参考内容
 
