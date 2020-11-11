@@ -6,14 +6,14 @@
 
 ## 1.git remote 远程分支管理
 
-1.git remote 不带参数，列出已经存在的远程分支
+### 1.git remote 不带参数，列出已经存在的远程分支
 
 ```sh
 $ git remote
 origin
 ```
 
-2.git remote -v | --verbose
+### 2.git remote -v | --verbose
 
 列出详细信息，在每一个名字后面列出其远程url，此时， -v 选项(译注:此为 –verbose 的简写,取首字母),显示对应的克隆地址。
 
@@ -23,13 +23,13 @@ origin  https://github.com/YinggangDong/rabbitmq.git (fetch)
 origin  https://github.com/YinggangDong/rabbitmq.git (push)
 ```
 
-3.git remote add url 添加一个远程仓库
+### 3.git remote add url 添加一个远程仓库
 
 ```sh
 $ git remote add origin https://github.com/YinggangDong/Multiprocessor.git
 ```
 
-4.解除本地项目和远程库的关联
+### 4.解除本地项目和远程库的关联
 
 ```sh
 git remote remove 远端仓库名称(origin)
@@ -37,7 +37,7 @@ git remote remove 远端仓库名称(origin)
 
 ## 2.git branch 分支管理
 
-1.查看当前分支列表
+### 1.查看当前分支列表
 
 ```sh
 $ git branch
@@ -50,7 +50,7 @@ $ git branch
 
 其中带“*”号标识的是当前分支。
 
-2.分支创建
+### 2.分支创建
 
 共两种方式，通过 git branch [分支名] 或者 git checkout -b [分支名] 来进行分支的新建
 
@@ -64,7 +64,7 @@ Switched to a new branch 'dev0.5'
 
 ```
 
-3.分支的切换
+### 3.分支的切换
 
 通过 git checkout 进行分支的切换
 
@@ -75,7 +75,7 @@ $ git checkout dev0.2
 Switched to branch 'dev0.2'
 ```
 
-4.分支的删除
+### 4.分支的删除
 
 通过 git branch -d [分支名] 进行分支的删除
 
@@ -84,7 +84,7 @@ $ git branch -d dev0.5
 Deleted branch dev0.5 (was c4085d0).
 ```
 
-5.设置项目的默认pull 和 push的远程分支
+### 5.设置项目的默认pull 和 push的远程分支
 
 通过 git branch --set-upstream-to 属性的设置，可以设置项目的默认pull和push的远程分支
 
@@ -93,7 +93,7 @@ $ git branch --set-upstream-to=origin/master master
 Branch 'master' set up to track remote branch 'master' from 'origin'.
 ```
 
-6.将分支推送至远程
+### 6.将分支推送至远程
 
 通过 git push origin [branch] 可以将分支推送至远端的仓库，若不推送，则该分支是仅自己可见的，别人不可见。推送至远端后，所有人都可见。 
 
@@ -111,7 +111,7 @@ To https://github.com/YinggangDong/security.git
 
 ## 3.更新与合并
 
-1.更新并合并当前分支的最新改动
+### 1.更新并合并当前分支的最新改动
 
 要更新本地仓库的代码至本分支的最新，需要执行 git pull 命令。git pull 命令是 **获取（fetch）**并 **合并（merge）**远端的改动。
 
@@ -120,7 +120,7 @@ $ git pull
 Already up to date.
 ```
 
-2.合并其他分支改动至当前分支
+### 2.合并其他分支改动至当前分支
 
 想要将其他分支的改动拉取到当前分支时，可以通过 git merge 指令完成，git 会尝试自动合并改动，成功则如下显示：
 
@@ -138,7 +138,7 @@ Fast-forward
 	
 ```
 
-3.处理冲突
+### 3.处理冲突
 
 在团队合作开发中，1和2的操作并非每次都会成功，若存在两个或更多人编辑了同一段代码，就会出现**冲突（conflicts）**。这时候就需要手动合并这些冲突了。
 
@@ -198,7 +198,7 @@ $
 
 可以看到，如果加上“.”进行提交，会提示处于 merge 状态不能够进行这样的 commit ，去掉 “.”之后就可以正常commit ,可以看到 commit 成功后，master|后面的 MERGING 标识已经消失，代表本次合并已经完成。
 
-4.预览差异
+### 4.预览差异
 
 在合并之前，可以通过 git diff [源分支] [目标分支] 的命令查看两个分支的差异。
 
@@ -224,7 +224,7 @@ index c0b1391..467ec3b 100644
 
 ## 4.提交
 
-1.提交本地修改至本地仓库
+### 1.提交本地修改至本地仓库
 
 通过 git commit [文件名或.（代表所有改动）] -m “提交说明内容” 进行修改的提交。
 
