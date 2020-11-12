@@ -33,7 +33,92 @@ $ git remote add origin https://github.com/YinggangDong/Multiprocessor.git
 
 ```sh
 git remote remove 远端仓库名称(origin)
+
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git remote rm origin
+
 ```
+
+### 5.延伸——github的push总是要求输入用户名密码
+
+我们将github上的工程clone到本地后，修改完代码后想要push到github，但总时不时的会有提示输入用户名及密码。
+
+**原因分析**
+
+出现这种情况的原因是我们使用了http的方式clone代码到本地，相应的，也是使用http的方式将代码push到服务器。
+
+通过 git remote -v 命令就可以看到自己连接github仓库的方式：
+
+```sh
+输入用户名密码失败导致的错误
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git push origin master
+fatal: HttpRequestException encountered.
+   ▒▒▒▒▒▒▒▒ʱ▒▒▒▒
+fatal: HttpRequestException encountered.
+   ▒▒▒▒▒▒▒▒ʱ▒▒▒▒
+remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/YinggangDong/note.git/'
+
+查看连接仓库的方式
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git remote -v
+origin  https://github.com/YinggangDong/note.git (fetch)
+origin  https://github.com/YinggangDong/note.git (push)
+
+
+```
+
+可以发现确实是通过https方式进行的连接。
+
+**解决方案**
+
+通过ssh方式连接github仓库就可以规避掉该问题。
+
+通过本节的学习，就可以完成更换远程仓库连接。步骤如下：
+
+1.移除远端地址
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git remote rm origin	
+```
+
+2.增加新的ssh方式的远端地址。
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git remote add origin git@github.com:YinggangDong/note.git
+```
+
+3.尝试push代码
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git push
+fatal: The current branch master has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin master
+```
+
+会发现出现了问题，提示当前分支没有设置上传的远端分支，需要先进行远端分支的指定，才能够正常完成push操作。并且提示中还给了我们需要执行的命令：
+
+```sh
+git push --set-upstream origin master
+```
+
+其中，远程分支若不是master，可以进行修改，例如远程是个开发分支，名称为dev1.4，则将master修改为dev1.4即可，如下：
+
+```sh
+git push --set-upstream origin dev1.4
+```
+
+需要注意的是，该指定远端分支的指令会自动执行一次git push，也就是说执行完该指令后不需要再另外执行git push了，改动已经完成推送到远端的操作。
+
+
 
 ## 2.git branch 分支管理
 
@@ -528,8 +613,10 @@ Git 项目有 20,000 多条提交，但我们给出搜索选项后，仅列出�
 
 ## 参考内容
 
-[1] [git - 简明指南](http://rogerdudler.github.io/git-guide/index.zh.html)
+【1】[git - 简明指南](http://rogerdudler.github.io/git-guide/index.zh.html)
 
-[2] [你知道如何查看git的log吗？](https://blog.csdn.net/lshemail/article/details/51787250)
+【2】 [你知道如何查看git的log吗？](https://blog.csdn.net/lshemail/article/details/51787250)
 
-[3] [IDEA 设置项目的默认pull 和 push的远程分支](https://blog.csdn.net/sgl520lxl/article/details/88425324)
+【3】 [IDEA 设置项目的默认pull 和 push的远程分支](https://blog.csdn.net/sgl520lxl/article/details/88425324)
+
+【4】[解决git push代码到github上一直提示输入用户名及密码的问题](https://blog.csdn.net/yychuyu/article/details/80186783)
