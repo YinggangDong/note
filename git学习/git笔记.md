@@ -245,11 +245,169 @@ v1.0            标签
 
 ### 4.本地创建标签
 
-```sh
-git tag <version-number>
+通过命令 git tag <version-number> 可以创建一个本地标签，默认tag是打在最近一次的 commit 上
 
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag sv1.0.3
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag
+sv1.0.1
+sv1.0.2
+sv1.0.3
+v1.0
 
 ```
+
+若要添加描述或者指定 commit 打 tag，则需要如下的命令：
+
+```sh
+$ git tag -a <version-number> -m "v1.0 发布(描述)" <commit-id>
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git log --oneline
+0d1b579 (HEAD -> master, tag: sv1.0.3) 标签命令内容
+8496ca4 git 标签内容
+b7b23e2 标签创建
+efc4c8e (tag: v1.0, tag: sv1.0.2, tag: sv1.0.1, origin/master, dev1.0.1) 标签
+b17003d 补充内容
+9f37cdb 增加github总是需要输入用户密码的解决方案
+fda9789 commit和push命令
+4eb97d7 增加springboot项目搭建的笔记
+d775dbd 提交OSS的相关内容
+91db4f5 git笔记上传
+325516c style:git笔记提交
+545c8f7 增加git命令记录内容
+ae19407 增加git相关笔记内容
+d8e1fde feat:git笔记提交
+c7e8223 Merge branch 'master' of https://github.com/YinggangDong/note
+55cc63b doc:修复文件夹名称
+8e772df Update README.md
+ff3d93e feat:增加加密相关笔记
+e62627e style:统一文件命名
+3b75e1a style:修改格式
+385163d feat:命令模式部分内容修改
+3e1d78b feat: Optional 的实际应用的内容
+d120d2a Merge branch 'master' of https://github.com/YinggangDong/note
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag -a sv1.0.4 -m "第四次提测标签" 9f37cdb
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag
+sv1.0.1
+sv1.0.2
+sv1.0.3
+sv1.0.4
+v1.0
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag -ln
+sv1.0.1         标签
+sv1.0.2         v1.0版本第二次提测
+sv1.0.3         标签命令内容
+sv1.0.4         第四次提测标签
+v1.0            标签
+
+```
+
+### 5.推送标签到远程仓库
+
+通过 git push origin [标签名] 能够将本地标签推送至远程仓库，如下：
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git push origin sv1.0.1
+Total 0 (delta 0), reused 0 (delta 0)
+To github.com:YinggangDong/note.git
+ * [new tag]         sv1.0.1 -> sv1.0.1
+
+```
+
+若想将所有的标签都推送至远端，则通过 git push origin --tags 进行推送。
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git push origin --tags
+Enumerating objects: 21, done.
+Counting objects: 100% (21/21), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (16/16), done.
+Writing objects: 100% (16/16), 2.00 KiB | 256.00 KiB/s, done.
+Total 16 (delta 9), reused 0 (delta 0)
+remote: Resolving deltas: 100% (9/9), completed with 4 local objects.
+To github.com:YinggangDong/note.git
+ * [new tag]         sv1.0.2 -> sv1.0.2
+ * [new tag]         sv1.0.3 -> sv1.0.3
+ * [new tag]         sv1.0.4 -> sv1.0.4
+ * [new tag]         v1.0 -> v1.0
+
+```
+
+### 6.删除本地标签
+
+通过 git tag -d <tag-name> 可以删除本地标签
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag -a sv1.0.5 -m "测试本地删除"
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag
+sv1.0.1
+sv1.0.2
+sv1.0.3
+sv1.0.4
+sv1.0.5
+v1.0
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag -d sv1.0.5
+Deleted tag 'sv1.0.5' (was 1dc49ef)
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+
+```
+
+### 7.删除远程标签
+
+通过 git push origin --delete tag <tagname> 可以删除远程的标签
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag
+sv1.0.1
+sv1.0.2
+sv1.0.3
+sv1.0.4
+v1.0
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git push origin --delete tag sv1.0.4
+To github.com:YinggangDong/note.git
+ - [deleted]         sv1.0.4
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag -ln
+sv1.0.1         标签
+sv1.0.2         v1.0版本第二次提测
+sv1.0.3         标签命令内容
+sv1.0.4         第四次提测标签
+v1.0            标签
+```
+
+可以发现本地的标签没有被删除，仅仅是远程标签被删除了，本地不受影响。
+
+### 8.切回到某个标签
+
+一般上线之前都会打 tag，就是为了防止上线后出现问题，方便快速回退到上一版本。下面的命令是回到某一标签下的状态：
+
+```sh
+git checkout -b branch_name tag_name
+```
+
+## 
 
 ## 4.git pull 更新与合并
 
