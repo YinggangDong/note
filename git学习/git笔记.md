@@ -223,11 +223,33 @@ v1.0
 
 ### 2.展示当前分支最近的tag
 
+```sh
+git describe --tags --abbrev=0
+```
 
 
-默认 tag 是打在最近的一次 commit 上，如果需要指定 commit 打tag
+
+### 3.查看标签的详细信息
+
+```sh
+git tag -ln
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag -ln
+sv1.0.1         标签
+sv1.0.2         v1.0版本第二次提测
+v1.0            标签
+```
+
+默认 tag 是打在最近的一次 commit 上，如果需要指定 commit 打 tag
+
+### 4.本地创建标签
+
+```sh
+git tag <version-number>
 
 
+```
 
 ## 4.git pull 更新与合并
 
