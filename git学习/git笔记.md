@@ -405,9 +405,13 @@ v1.0            标签
 
 ```sh
 git checkout -b branch_name tag_name
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git checkout -b dev1.0.2 sv1.0.4
+Switched to a new branch 'dev1.0.2'
 ```
 
-## 
+创建并捡出新的分支 dev1.0.2 。
 
 ## 4.git pull 更新与合并
 
