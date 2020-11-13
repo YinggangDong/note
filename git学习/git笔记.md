@@ -118,8 +118,6 @@ git push --set-upstream origin dev1.4
 
 需要注意的是，该指定远端分支的指令会自动执行一次git push，也就是说执行完该指令后不需要再另外执行git push了，改动已经完成推送到远端的操作。
 
-
-
 ## 2.git branch 分支管理
 
 ### 分支是什么？
@@ -208,7 +206,9 @@ To https://github.com/YinggangDong/security.git
 
 ## 3.git tag 标签管理
 
+### 标签是什么？
 
+标签的概念在SVN盛行时就已经存在，通常是作为软件发布的源码的存档。能够分析
 
 ## 4.git pull 更新与合并
 
@@ -385,11 +385,15 @@ $ git commit .
 
 改动已经通过 git commit 命令完成了提交，被提交到了本地的 HEAD中，接下来就是向远端进行提交了，所谓的远端，就是我们通常所说的 git 仓库，它可以是公司在服务器上搭建的私有 gitlib ，可以是 github ，也可以是 gitee，所谓远端，就是和自己的本地仓库向对应，它可能在任何地方，但通常不在自己的电脑上。
 
+### 1.推送至远端
+
 可以通过 git push origin [远端接收分支] 的命令进行该推送过程，命令形如：
 
 ```sh
 git push origin master 
 ```
+
+可以将 master 修改为 任意分支名称，推送至远端的不同分支。
 
 
 
