@@ -208,7 +208,22 @@ To https://github.com/YinggangDong/security.git
 
 ### 标签是什么？
 
-标签的概念在SVN盛行时就已经存在，通常是作为软件发布的源码的存档。能够分析
+标签的概念在SVN盛行时就已经存在，通常是作为软件发布的一部分。能够记录项目的重要阶段，并且记录最近一次提交后的代码的快照。
+
+### 1.查看标签
+
+通过 git tag 命令可以查看当前项目的所有标签信息。
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记 (master)
+$ git tag
+sv1.0.1
+v1.0
+```
+
+这里的标签可以是在任何一个分支上进行打的。
+
+
 
 ## 4.git pull 更新与合并
 
