@@ -6,4 +6,5 @@
 4. git指令
 5. springboot相关
 6. rabbitMQ相关
-7. java8特性
+7. java8新特性
+8. redis
