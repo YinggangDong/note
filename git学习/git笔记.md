@@ -859,7 +859,56 @@ Saved working directory and index state WIP on master: acbc4e4 git隐藏功能
 
 ### 2.将隐藏的改动恢复
 
-通过 git stash pop 可以进行改动的恢复
+隐藏的改动有两种恢复方案，
+
+一是用`git stash apply`恢复，但是恢复后，stash内容并不删除，你需要用`git stash drop`来删除；
+
+恢复
+
+```sh
+
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/java8/src (master)
+$ git stash apply
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   main/java/cn/dyg/optional/OptionalDemo.java
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        ../.idea/
+        ../java8.iml
+        ../target/
+
+
+```
+
+删除
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/java8/src (master)
+$ git stash list
+stash@{0}: WIP on master: 2790288 feat:增加Optional类的ifPresent和filter方法的配合进行判空且判null
+stash@{1}: WIP on master: 2790288 feat:增加Optional类的ifPresent和filter方法的配合进行判空且判null
+stash@{2}: WIP on master: 2790288 feat:增加Optional类的ifPresent和filter方法的配合进行判空且判null
+
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/java8/src (master)
+$ git stash drop
+Dropped refs/stash@{0} (8a738cd01b5adcc00ed3f096535740e245b00fe5)
+
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/java8/src (master)
+$ git stash list
+stash@{0}: WIP on master: 2790288 feat:增加Optional类的ifPresent和filter方法的配合进行判空且判null
+stash@{1}: WIP on master: 2790288 feat:增加Optional类的ifPresent和filter方法的配合进行判空且判null
+
+```
+
+
+
+另一种方式是用`git stash pop`，恢复的同时把stash内容也删了：
 
 ```sh
 回到最后一个 stash 的状态，并删除这个 stash
@@ -877,6 +926,8 @@ no changes added to commit (use "git add" and/or "git commit -a")
 Dropped refs/stash@{0} (07dd71e48e2e21e2f1ccce32f02ba4165784b556)
 
 ```
+
+
 
 ### 3.查看隐藏的list
 
