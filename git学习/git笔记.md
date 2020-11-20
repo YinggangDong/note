@@ -927,6 +927,31 @@ Dropped refs/stash@{0} (07dd71e48e2e21e2f1ccce32f02ba4165784b556)
 
 ```
 
+若是存在多次 stash ,可以通过指定 stash 名称的形式完成，通过 git stash list 查看并恢复指定的 stash 。
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/java8/src (master)
+$ git stash pop stash@{1}
+Auto-merging src/main/java/cn/dyg/optional/OptionalDemo.java
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   main/java/cn/dyg/optional/OptionalDemo.java
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        ../.idea/
+        ../java8.iml
+        ../target/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped stash@{1} (7aee6ece7eeab4afa667f5d4656d51a02a85c168)
+
+```
+
 
 
 ### 3.查看隐藏的list
