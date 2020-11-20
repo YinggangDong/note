@@ -842,7 +842,37 @@ git 提供了隐藏当前改动和恢复的功能。该功能通常用于不能�
 
 ### 1.隐藏改动
 
-通过 git stach 可以隐藏当前本地的所有改动，
+通过 git stach 可以隐藏当前本地的所有改动，实例如下：
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记/git学习 (master)
+$ git stash
+Saved working directory and index state WIP on master: acbc4e4 git隐藏功能
+
+```
+
+### 2.将隐藏的改动恢复
+
+通过 git stash pop 可以进行改动的恢复
+
+```sh
+回到最后一个 stash 的状态，并删除这个 stash
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记/git学习 (master)
+$ git stash pop
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   "git\347\254\224\350\256\260.md"
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (07dd71e48e2e21e2f1ccce32f02ba4165784b556)
+
+```
+
+
 
 ## 参考内容
 
