@@ -880,6 +880,68 @@ Dropped refs/stash@{0} (07dd71e48e2e21e2f1ccce32f02ba4165784b556)
 
 通过 git stash list 可以查看所有的
 
+## 9.git status 工作区状态
+
+通过 git status 可以查看当前工作区的状态，可以看到是否存在未提交的修改，未推送的修改等信息。
+
+### 1.存在未提交内容
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记/git学习 (master)
+$ git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   "git\347\254\224\350\256\260.md"
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+### 2.存在未推送内容
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记/git学习 (master)
+$ git commit . -m "stash场景"
+[master 770e431] stash场景
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记/git学习 (master)
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean
+```
+
+### 3.无改动
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记/git学习 (master)
+$ git push
+Enumerating objects: 7, done.
+Counting objects: 100% (7/7), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 865 bytes | 96.00 KiB/s, done.
+Total 4 (delta 3), reused 0 (delta 0)
+remote: Resolving deltas: 100% (3/3), completed with 3 local objects.
+To github.com:YinggangDong/note.git
+   1e74dc2..770e431  master -> master
+
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记/git学习 (master)
+$ git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+```
+
+
+
 ## 参考内容
 
 【1】[git - 简明指南](http://rogerdudler.github.io/git-guide/index.zh.html)
