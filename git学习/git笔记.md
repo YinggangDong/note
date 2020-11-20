@@ -834,6 +834,16 @@ b0ad11e - pull: allow "git pull origin $something:$cur"
 
 Git 项目有 20,000 多条提交，但我们给出搜索选项后，仅列出了其中满足条件的 6 条。
 
+
+
+## 8.git stash 隐藏改动
+
+git 提供了隐藏当前改动和恢复的功能。该功能通常用于不能够进行 git
+
+### 1.隐藏改动
+
+通过 git stach 可以隐藏当前本地的所有改动，
+
 ## 参考内容
 
 【1】[git - 简明指南](http://rogerdudler.github.io/git-guide/index.zh.html)
