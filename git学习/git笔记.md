@@ -844,6 +844,8 @@ git 提供了隐藏当前改动和恢复的功能。该功能通常用于不能�
 
 这时，stash 功能就派上了用场。可以将当前的开发内容隐藏起来，等到解决完 bug 后再恢复改动。
 
+参见[Bug分支-廖雪峰](https://www.liaoxuefeng.com/wiki/896043488029600/900388704535136)
+
 ### 1.隐藏改动
 
 通过 git stach 可以隐藏当前本地的所有改动，实例如下：
@@ -878,7 +880,18 @@ Dropped refs/stash@{0} (07dd71e48e2e21e2f1ccce32f02ba4165784b556)
 
 ### 3.查看隐藏的list
 
-通过 git stash list 可以查看所有的
+通过 git stash list 可以查看所有的隐藏内容
+
+```sh
+dongyinggang@YF-dongyinggang MINGW64 /f/GitHub/java8/src (master)
+$ git stash list
+stash@{0}: WIP on master: 2790288 feat:增加Optional类的ifPresent和filter方法的配合进行判空且判null
+stash@{1}: WIP on master: 2790288 feat:增加Optional类的ifPresent和filter方法的配合进行判空且判null
+stash@{2}: WIP on master: 2790288 feat:增加Optional类的ifPresent和filter方法的配合进行判空且判null
+
+```
+
+
 
 ## 9.git status 工作区状态
 
@@ -951,3 +964,5 @@ nothing to commit, working tree clean
 【3】 [IDEA 设置项目的默认pull 和 push的远程分支](https://blog.csdn.net/sgl520lxl/article/details/88425324)
 
 【4】[解决git push代码到github上一直提示输入用户名及密码的问题](https://blog.csdn.net/yychuyu/article/details/80186783)
+
+【5】[Bug分支-廖雪峰](https://www.liaoxuefeng.com/wiki/896043488029600/900388704535136)
