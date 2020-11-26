@@ -216,7 +216,7 @@ interface TestThree {
 
 编译器在进行参数推断时，会根据函数式接口的参数去寻找是否有同参数类型的构造方法，如果没有对应的构造方法，会有如下提示：
 
-![image-20201021134555037](图片/image-20201021134555037.png)
+![image-20201021134555037](https://gitee.com/BelieverD/Picture/raw/master/img/20201126091539.png)
 
 简单样例：
 
