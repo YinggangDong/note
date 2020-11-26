@@ -23,7 +23,7 @@
 
 > 上述介绍的是一些日志框架的实现，这里我们需要用日志门面来解决系统与日志实现框架的耦合性。SLF4J，即简单日志门面（Simple Logging Facade for Java），它不是一个真正的日志实现，而是一个抽象层（ abstraction layer），它允许你在后台使用任意一个日志实现。
 
-![img](http://axin-soochow.oss-cn-hangzhou.aliyuncs.com/18-12-3/35274748.jpg)
+![img](https://gitee.com/BelieverD/Picture/raw/master/img/20201126094904.jpeg)
 
 前面介绍的几种日志框架一样，每一种日志框架都有自己单独的API，要使用对应的框架就要使用其对应的API，这就大大的增加应用程序代码对于日志框架的耦合性。
 
@@ -35,12 +35,12 @@
 
 在这列举一下一些网上其他博文中对它们的性能评测：
 
-![img](http://axin-soochow.oss-cn-hangzhou.aliyuncs.com/18-12-10/45608002.jpg)
+![img](https://gitee.com/BelieverD/Picture/raw/master/img/20201126094946.jpeg)
 
 - 可以看到在同步日志模式下, Logback的性能是最糟糕的.
 - log4j2的性能无论在同步日志模式还是异步日志模式下都是最佳的.
 
-![img](http://axin-soochow.oss-cn-hangzhou.aliyuncs.com/18-12-10/31312446.jpg)
+![img](https://gitee.com/BelieverD/Picture/raw/master/img/20201126094913.jpeg)
 
 log4j2优越的性能其原因在于log4j2使用了LMAX,一个无锁的线程间通信库代替了,logback和log4j之前的队列. 并发性能大大提升。
 
