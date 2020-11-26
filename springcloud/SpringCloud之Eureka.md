@@ -1,5 +1,5 @@
 [toc]
-# SpringCloud之Eureka
+# SpringCloud 之 Eureka
 
 ## 前言
 >
