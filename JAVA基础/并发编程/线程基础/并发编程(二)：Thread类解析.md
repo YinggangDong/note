@@ -152,5 +152,108 @@ name是由入参决定的，与 threadInitNumber 无关。
 
 符合预期，出现了两种方式分别设置的线程名称。
 
+### 1.3 守护线程
+
+守护线程是**为其他线程服务的**
+
+- **垃圾回收线程就是守护线程**~
+
+守护线程有一个**特点**：
+
+- 当别的用户线程执行完了，虚拟机就会退出，守护线程也就会被停止掉了。
+
+- 也就是说：守护线程作为一个**服务线程，没有服务对象就没有必要继续运行**了
+
+**使用线程的时候要注意的地方**
+
+1. **在线程启动前**设置为守护线程，方法是setDaemon(boolean on)
+
+原因：
+
+![image-20201201204249914](图片/image-20201201204249914.png)
+
+2. 使用守护线程**不要访问共享资源**(数据库、文件等)，因为它可能会在任何时候就挂掉了。
+
+3. 守护线程中产生的新线程也是守护线程
+
+守护线程测试代码：
+
+1.创建一个线程类作为守护线程实例
+
+```java
+package cn.dyg.threadbasic.source;
+
+/**
+ * DaemonThread 类是 守护线程类
+ *
+ * @author dongyinggang
+ * @date 2020-07-13 11:14
+ **/
+public class DaemonThread implements Runnable{
+
+    @Override
+    public void run() {
+        //守护线程创建的子线程进行自己线程名称的输出,该子线程未显式声明为守护线程，但实际也是一个守护线程
+        Thread thread = new Thread(
+                ()-> System.out.println(Thread.currentThread().getName()+"是否守护线程："+
+                        Thread.currentThread().isDaemon()),
+                "守护线程创建的子线程");
+        thread.start();
+        //守护线程是一个死循环
+        while(true){
+            System.out.println(Thread.currentThread().getName()+"这是一个守护线程");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+2.测试代码
+
+```java
+/**
+ * daemonTest 方法是 守护线程测试
+ *
+ * @author dongyinggang
+ * @date 2020/12/1 20:18
+ */
+public static void daemonTest() {
+    //创建守护线程实例
+    DaemonThread daemonThread = new DaemonThread();
+    Thread daemon = new Thread(daemonThread, "守护线程---->");
+
+    //声明为守护线程并启动
+    daemon.setDaemon(true);
+    daemon.start();
+    try {
+        //尽管守护线程中是个死循环,但随着主线程结束而终止
+        Thread.sleep(2000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+测试结果如下：
+
+![image-20201201204502369](图片/image-20201201204502369.png)
+
+可以看到以下两点是符合预期的：
+
+1. 尽管守护线程是个死循环，但在主线程结束后，守护线程也停止了，没有继续输出。
+2. 守护线程创建的子线程进行自己线程名称的输出,该子线程未显式声明为守护线程，但实际也是一个守护线程
+
+### 1.3 线程优先级
+
+
+
+### 1.4 线程生命周期
+
+
+
 ## 参考内容
 
