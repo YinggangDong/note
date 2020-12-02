@@ -249,7 +249,46 @@ public static void daemonTest() {
 
 ### 1.3 线程优先级
 
+线程优先级高仅仅表示线程**获取的****CPU****时间片的几率高**，但这不是一个**确定的因素**！
 
+线程的优先级是**高度依赖于操作系统的**，Windows和Linux就有所区别(Linux下优先级可能就被忽略了)~
+
+可以看到的是，Java提供的优先级默认是5，最低是1，最高是10：
+
+![image-20201202075701330](图片/image-20201202075701330.png)
+
+如果想要改变线程的优先级，可以通过 setPriority(int newPriority) 的方式进行设置，该方法具体实现如下：
+
+![image-20201202080605266](图片/image-20201202080605266.png)
+
+**只有线程组不为空的线程才能够设置优先级，且优先级不能比线程组的优先级高。**
+
+若没有在构造方法中指定线程组，在线程初始化时由 SecurityManager（是安全管理器，未显式指定，通常为null，详情见[java线程基础知识----SecurityManager类详解](https://www.cnblogs.com/liboBlog/p/6431722.html)） 或父线程的线程组来进行指定。
+
+其中调用的 setPriority0(int newPriority) 是一个本地（native）方法。
+
+线程优先级示例代码：
+
+```java
+/**
+ * priorityTest 方法是 线程优先级示例代码
+ * 
+ * @author dongyinggang
+ * @date 2020/12/2 9:00
+ */
+public static void priorityTest(){
+    Thread thread = new Thread(new ImplRunnable("r-1"));
+    System.out.println("安全管理器："+System.getSecurityManager());
+    System.out.println(thread.getThreadGroup()+"线程组最大的优先级："+thread.getThreadGroup().getMaxPriority());
+    System.out.println("原线程优先级："+thread.getPriority());
+    thread.setPriority(6);
+    System.out.println("修改后的线程优先级："+thread.getPriority());
+}
+```
+
+运行结果：
+
+![image-20201202090110947](图片/image-20201202090110947.png)
 
 ### 1.4 线程生命周期
 
@@ -257,3 +296,4 @@ public static void daemonTest() {
 
 ## 参考内容
 
+【1】[java线程基础知识----SecurityManager类详解](https://www.cnblogs.com/liboBlog/p/6431722.html)
