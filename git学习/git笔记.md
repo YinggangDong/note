@@ -1042,3 +1042,5 @@ nothing to commit, working tree clean
 【4】[解决git push代码到github上一直提示输入用户名及密码的问题](https://blog.csdn.net/yychuyu/article/details/80186783)
 
 【5】[Bug分支-廖雪峰](https://www.liaoxuefeng.com/wiki/896043488029600/900388704535136)
+
+【6】[git可视化操作](https://oschina.gitee.io/learn-git-branching/)
