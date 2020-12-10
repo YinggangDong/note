@@ -40,7 +40,7 @@ $ git remote rm origin
 
 ```
 
-### 5.延伸——github的push总是要求输入用户名密码
+### 5.延伸—github的push总是要求输入用户名密码
 
 我们将github上的工程clone到本地后，修改完代码后想要push到github，但总时不时的会有提示输入用户名及密码。
 
@@ -584,9 +584,35 @@ $ git commit .
 
 通过 git commit 命令，改动已经被提交到 HEAD中，但是还没有到远端仓库中。
 
-### 3.拓展：github提交时关联issue
+### 3.延伸—github提交时关联或关闭issue
 
 在 commit 指令的注释中添加 #issueid 就可以实现关联issue的功能。
+
+```java
+dongyinggang@YF-dongyinggang MINGW64 ~/Desktop/学习笔记/git学习 (master)
+$ git commit . -m "feat: #2 如何关联issue"
+[master 336fb84] feat: #2 如何关联issue
+ 1 file changed, 6 insertions(+)
+```
+
+这里的 "#2"即 #issueid 的值，可以看到 github 的提交显示如下：
+
+![image-20201210111941429](图片/image-20201210111941429.png)
+
+issue页面的显示如下：
+
+![image-20201210112016163](图片/image-20201210112016163.png)
+
+该提交成功绑定至 issue。
+
+如果需要使用当前提交进行某个 issue 的关闭，则可以通过在 commit 的注释中增加以下几种 github 能够识别的关闭指令：
+
+- `fixes #xxx`
+- `fixed #xxx`
+- `fix #xxx`
+- `closes #xxx`
+- `close #xxx`
+- `closed #xxx`
 
 
 
