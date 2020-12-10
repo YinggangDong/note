@@ -8,3 +8,5 @@
 6. rabbitMQ相关
 7. java8新特性
 8. redis
+
+测试关联issue
