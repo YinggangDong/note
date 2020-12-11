@@ -1,4 +1,4 @@
-# synchronized锁
+# 锁(一)：synchronized锁
 
 [toc]
 
