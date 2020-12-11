@@ -1,4 +1,4 @@
-# zidea中的springboot项目创建
+# idea中的springboot项目创建
 
 1.打开IDEA，点击 +Create New Project. 开始创建一个新项目。
 
