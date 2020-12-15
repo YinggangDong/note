@@ -1,11 +1,14 @@
 # note
 个人学习笔记
 1. java基础
-2. spring相关
-3. 设计模式
-4. git指令
-5. springboot相关
-6. rabbitMQ相关
-7. java8新特性
-8. redis
-
+2. 常用轮子
+3. linux
+4. 设计模式
+5. git
+6. java基础
+7. JVM
+8. spring相关
+9. springboot
+10. springcloud
+11. 消息中间件
+12. 数据库
