@@ -5,9 +5,8 @@
 3. linux
 4. 设计模式
 5. git
-6. java基础
 7. JVM
-8. spring相关
+8. spring
 9. springboot
 10. springcloud
 11. 消息中间件
