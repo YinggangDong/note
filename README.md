@@ -5,9 +5,11 @@
 3. linux
 4. 设计模式
 5. git
-7. JVM
-8. spring
-9. springboot
-10. springcloud
-11. 消息中间件
-12. 数据库
+6. JVM
+7. spring
+8. springboot
+9. springcloud
+10. 消息中间件
+11. 数据库
+12. 容器技术
+13. 计算机基础
