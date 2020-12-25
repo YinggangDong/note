@@ -48,7 +48,7 @@ public class ArrayList<E> extends AbstractList<E>
    [randomaccess接口]: https://blog.csdn.net/weixin_39148512/article/details/79234817
 
 3. Cloneable接口是一个标记接口，只有实现这个接口后，然后在类中重写Object中的clone方法，然后通过类调用clone方法才能克隆成功，如果不实现这个接口，则会抛出CloneNotSupportedException(克隆不被支持)异常。
-4. Serializable接口是一个标记接口，实现这个接口后，可以在
+4. Serializable接口是一个标记接口，实现这个接口后，能够被序列化。
 
 ### 2.2 类中属性
 
@@ -608,3 +608,5 @@ ensureCapacity及其关联方法是用来指定最小容量的，其中ensureCap
 4. [List的复制 （浅拷贝与深拷贝）](https://www.cnblogs.com/luxd/p/11933686.html)
 5. [关于Cloneable接口和clone方法](https://www.cnblogs.com/yangfei629/p/11392034.html)
 7. [Java删除List元素的方法](https://www.cnblogs.com/flotang/p/9216098.html)
+
+7. [Serializable 接口（序列化）](https://www.cnblogs.com/fzxey/p/10834655.html)
