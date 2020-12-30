@@ -9,7 +9,7 @@
 - ack：应答，值为告诉对方下一次所发数据地址 
 - seq：值为所发数据地址
 
-**TCP握手**
+## TCP握手
 
 根据图片所示： 
 
@@ -39,7 +39,7 @@ seq是数据包本身的序列号；ack是期望对方继续发送的那个数�
 
 假设不采用“三次握手”，那么只要server发出确认，新的连接就建立了，由于client并没有发出建立连接的请求，因此不会理睬server的确认，也不会向server发送数据，但server却以为新的运输连接已经建立，并一直等待client发来数据。所以没有采用“三次握手”，这种情况下server的很多资源就白白浪费掉了。
 
-**TCP挥手**
+## TCP挥手
 
 1. 首先客户机是主动发起断开连接请求的（结合实际也能理解），向服务器发送：FIN=1，seq=x，表示客户机向服务器发送断开连接的申请标志位，客户机所发送数据地址为x 
 
@@ -69,7 +69,7 @@ TIME_WAIT 等待 2 倍的 MSL，比较合理的解释是：网络中可能存在
 
 其定义在 Linux 内核代码里的名称为 TCP_TIMEWAIT_LEN：
 
-## define TCP_TIMEWAIT_LEN (60*HZ) /* how long to wait to destroy TIME-WAIT state, about 60 seconds 
+**define TCP_TIMEWAIT_LEN (60*HZ) /* how long to wait to destroy TIME-WAIT state, about 60 seconds** 
 
 如果要修改 TIME_WAIT 的时间长度，只能修改 Linux 内核代码里 TCP_TIMEWAIT_LEN 的值，并重新编译 Linux 内核。
 
