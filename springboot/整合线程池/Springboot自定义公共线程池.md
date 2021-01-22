@@ -50,6 +50,79 @@ ScheduledThreadPool 主要处理定时任务或延时任务。
 
 如果我们要自定义创建一个线程池，直接通过 ThreadPoolExecutor 的构造方法就可以。
 
+```java
+public static ExecutorService customThreadPool(){
+        //核心线程数
+        int corePoolSize = 10;
+        //最大线程数
+        int maximumPoolSize = 10;
+        //非核心线程的最长存活时间（非核心线程多长时间后未执行任务就进行销毁）
+        long keepAliveTime = 0;
+        BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
+        String poolNamePrefix = "自定义线程池";
+        String threadNamePrefix = "线程名称前缀";
+        ThreadFactory threadFactory = new MyFactory(poolNamePrefix,threadNamePrefix);
+        ExecutorService customThreadPool = new ThreadPoolExecutor(corePoolSize,maximumPoolSize,
+                keepAliveTime,TimeUnit.SECONDS,workQueue,threadFactory);
+
+        return customThreadPool;
+}
+```
+
+ps：上面的代码中使用了自定义线程工程来控制生成的线程的名称，如果不指定自定义线程工厂的话，会使用 Executors 中的默认线程工厂 DefaultThreadFactory ，生成的线程名称是 pool-1-thread-1 （线程池 number +线程 number）。
+
+线程池成功创建了，那么如何将其集成到 springboot 项目中，允许我们在使用时可以方便获取呢？
+
+### 公共线程池的集成
+
+在 springboot 中进行公共线程池的配置，只需要通过 @Configuration 和 @Bean 两个注解的结合，就可以将一个线程池交给 spring 进行管理，在使用的时候获取到就可以了。
+
+创建线程池的相关代码如下：
+
+```java
+/**
+ * ThreadPoolConfig 类是 线程池配置
+ *
+ * @author dongyinggang
+ * @date 2021-01-22 19:10
+ **/
+@Configuration
+public class ThreadPoolConfig {
+
+    /**
+     * 核心线程数
+     */
+    private static final int CORE_POOL_SIZE = 10;
+    /**
+     * 最大线程数
+     */
+    private static final int MAXIMUM_POOL_SIZE = 10;
+    /**
+     * 工作队列长度
+     */
+    private static final int CAPACITY = 100;
+
+    /**
+     * 线程名称前缀
+     */
+    private static final String PREFIX = "common";
+
+    /**
+     * commonThreadPool 方法是 创建公共线程池,用于所有业务
+     *
+     * @return 公共线程池
+     * @author dongyinggang
+     * @date 2021/1/12 10:58
+     */
+    @Bean
+    public ExecutorService commonThreadPool() {
+        return ThreadPoolUtil.buildThreadPool(PREFIX, CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, CAPACITY);
+    }
+}
+```
+
+使用线程池的方式
+
 
 
 ## 参考内容
