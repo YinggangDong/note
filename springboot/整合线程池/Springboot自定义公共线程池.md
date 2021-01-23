@@ -73,11 +73,11 @@ ps：上面的代码中使用了自定义线程工程来控制生成的线程的
 
 线程池成功创建了，那么如何将其集成到 springboot 项目中，允许我们在使用时可以方便获取呢？
 
-### 公共线程池的集成
+## 公共线程池的集成
 
 在 springboot 中进行公共线程池的配置，只需要通过 @Configuration 和 @Bean 两个注解的结合，就可以将一个线程池交给 spring 进行管理，在使用的时候获取到就可以了。
 
-创建线程池的相关代码如下：
+**创建并集成线程池的方式：**
 
 ```java
 /**
@@ -121,9 +121,38 @@ public class ThreadPoolConfig {
 }
 ```
 
-使用线程池的方式
+上述代码中 ThreadPoolUtil 类的 buildThreadPool 方法是自己封装的创建线程池的方法，可以直接通过ThreadPoolExecutor 进行创建。
 
+**使用线程池的方式**
 
+```java
+/**
+ * testThreadPool 方法是 测试集成的公共线程池
+ *
+ * @return 结果
+ * @author dongyinggang
+ * @date 2021/1/23 10:50
+ */
+@Override
+public String testThreadPool() {
+    int threadNum = 10;
+    //启多个线程运行,每个线程睡眠2000ms
+    for (int i = 0; i < threadNum; i++) {
+        //直接通过threadPoolConfig.commonThreadPool()就可以获取到公共线程池
+        threadPoolConfig.commonThreadPool().execute(() -> {
+            System.out.println(Thread.currentThread().getName() + "正在运行");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+    return "成功启动" + threadNum + "个线程";
+}
+```
+
+线程池对象 commonThreadPool 注册到了 Spring 容器中，通过 threadPoolConfig.commonThreadPool() 就可以获取到公共线程池了。
 
 ## 参考内容
 
