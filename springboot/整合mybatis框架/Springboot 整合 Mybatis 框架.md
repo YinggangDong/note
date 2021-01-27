@@ -27,12 +27,12 @@ mybatis:
   mapper-locations: classpath:mapping/*Mapper.xml
   type-aliases-package: com.example.demo.dao
 
-  logging:
-    level:
-      com:
-        example:
-          demo:
-            mapper: debug
+logging:
+  level:
+    com:
+      example:
+        demo:
+          mapper: debug
 ```
 
 
