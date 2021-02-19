@@ -317,8 +317,94 @@ Thread类中有个被设置为过时的stop()方法，该方法是之前版本�
 由于stop方法可以让一个线程A终止掉另一个线程B
 
 1. 被终止的线程B会立即释放锁，这可能会让对象处于不一致的状态
-2. 线程A也不知道线程B什么时候能够被终止调，万一B还处于运行计算阶段。
-3. 
+2. 线程A也不知道线程B什么时候能够被终止，万一B还处于运行计算阶段，那么就会导致未完成对应业务即被终止。
+
+总之，stop方法的太不安全，因此被设置为过时。
+
+现在，我们通常使用 interrupt 来进行线程终止。
+
+1. interrupt 方法终止的是本线程。
+
+2. interrupt 方法不是立刻终止线程的，而是设置了一个终止标记。
+3. 接收到终止标记后，线程如何处理是由自己决定的（实际就是代码编写者决定后续业务逻辑）。
+
+测试类如下：
+
+```java
+/**
+ * ThreadInterruptTest 类是 interrupt方法测试类
+ *
+ * @author dongyinggang
+ * @date 2020-08-25 13:12
+ **/
+public class ThreadInterruptTest {
+    public static void main(String[] args) throws InterruptedException {
+        //1.创建并启动线程
+        Thread thread = new Thread(runnable, "sub-thread");
+        thread.start();
+        System.out.println("终断前子线程状态" + thread.getState());
+        //2.调用 interrupt 方法进行线程的中止，会设置一个终止标志，但实际并不强制终止，由子线程自己考虑终止时间
+        thread.interrupt();
+        //3.主线程休眠2s后再看子线程状态
+        Thread.sleep(2000);
+        //4.成功终止后,线程处于 TERMINATED 状态,终止标志为 false
+        System.out.println("--------------- 经过 2s 的等待后 ---------------");
+        System.out.println("终断后子线程状态 " + thread.getState() + "\n终止标志：" + thread.isInterrupted());
+
+    }
+
+    /**
+     * 通过lambda表达式声明一个Runnable对象
+     */
+    static Runnable runnable = () -> {
+        int i = 0;
+        //子线程每隔500ms就输出一次i值并+1
+        try {
+            int times = 10;
+            //2a.如果主线程终止操作成功,则会结束循环
+            while (i < times && !Thread.currentThread().isInterrupted()) {
+                System.out.println("子线程输出" + i++);
+                //2b.如果处于阻塞状态(可由wait、sleep、join三个方法引起),会抛出InterruptedException异常,被捕获
+                Thread.sleep(500);
+            }
+            System.out.println("子线程输出完毕");
+        } catch (InterruptedException e) {
+            //当子线程抛出异常，线程依旧存活,且终止状态被置为false
+            System.out.println("线程被终止时的状态：" + Thread.currentThread().getState());
+            System.out.println("线程是否处于终止状态：" + Thread.currentThread().isInterrupted());
+            e.printStackTrace();
+            //捕获到异常后，需要重新进行终止,才会将终止状态变更为true
+            Thread.currentThread().interrupt();
+            System.out.println("再次终止后:");
+            System.out.println("线程是否处于终止状态：" + Thread.currentThread().isInterrupted());
+            System.out.println("线程再次终止后的状态：" + Thread.currentThread().getState());
+        }
+    };
+}
+```
+
+值得注意的是，因为 interrupt 方法作用于由wait、sleep、join方法引起阻塞状态的线程时，会抛出 InterruptedException 异常，因此，当出现异常时需要进行什么样的操作，也是必须考虑的，否则就是不停的catch该异常但始终不能够完成终止线程的目标。
+
+测试代码中的运行结果如下，依此来看一下运行逻辑：
+
+![image-20210219193021765](图片/image-20210219193021765.png)
+
+1. 在终止前，子线程处于 RUNNABLE 即运行状态。
+2. 调用 interrupt 方法，子线程正处于由 Thread.sleep(500); 引起的阻塞状态，因此抛出 InterruptedException异常
+3. 通过 try-catch 代码块不活了异常后，先打印了线程状态，可以看到处于 RUNNABLE ，终止标志被设置为 false。
+4. 再次调用 interrupt 方法，此时可以正常的设置终止标志。
+5. 主线程休眠2s后，打印子线程状态，处于 TERMINATED 终止状态，终止标志被置为 false。
+
+除了上述抛出异常的逻辑外，这段代码还有一种输出可能，如下：
+
+![image-20210219193608515](图片/image-20210219193608515.png)
+
+这种输出是调用 interrupt 方法时，线程正处于运行状态的情况。过程如下：
+
+1. 在终止前，子线程处于 RUNNABLE 即运行状态。
+
+2. 调用 interrupt 方法，子线程处于运行状态，while中的执行条件不满足，直接输出"子线程输出完毕"，子线程执行完毕，实际就是完成了终止目的
+3. 主线程休眠2s后，子线程状态变更为 TERMINATED 终止状态，终止标志被置为 false。
 
 ## 参考内容
 
