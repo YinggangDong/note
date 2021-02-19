@@ -310,6 +310,16 @@ public static void priorityTest(){
 
 调用 join 方法，会等待该线程执行完毕后，才会执行别的线程，会让其他线程处于等待状态。
 
+#### 1.4.4 interrupt方法
+
+Thread类中有个被设置为过时的stop()方法，该方法是之前版本用来中断线程的方法。现在已经没有强制线程终止的方法了。
+
+由于stop方法可以让一个线程A终止掉另一个线程B
+
+1. 被终止的线程B会立即释放锁，这可能会让对象处于不一致的状态
+2. 线程A也不知道线程B什么时候能够被终止调，万一B还处于运行计算阶段。
+3. 
+
 ## 参考内容
 
 【1】[java线程基础知识----SecurityManager类详解](https://www.cnblogs.com/liboBlog/p/6431722.html)
