@@ -4,7 +4,7 @@
 
 [toc]
 
-## 一 Thread 的构造方法
+## 一 Thread 线程类 API
 
 ### 1.1 常见构造
 
@@ -249,7 +249,7 @@ public static void daemonTest() {
 
 ### 1.3 线程优先级
 
-线程优先级高仅仅表示线程**获取的****CPU****时间片的几率高**，但这不是一个**确定的因素**！
+线程优先级高仅仅表示线程**获取的CPU时间片的几率高**，但这不是一个**确定的因素**！
 
 线程的优先级是**高度依赖于操作系统的**，Windows和Linux就有所区别(Linux下优先级可能就被忽略了)~
 
@@ -292,25 +292,273 @@ public static void priorityTest(){
 
 ### 1.4 线程生命周期
 
-线程的基本状态有3个：执行、就绪、阻塞。
+线程的基本状态有6个：新建（NEW）、就绪(RUNNABLE)、阻塞(BLOCKED)、等待(WAITING)、计时等待(TIMED_WAITING)、终止(TERMINATED)。线程状态定义存在于 Thread.State 这个枚举中。
+
+#### 1.4.1 线程状态
+
+1. NEW就是在线程还没有启动的时候的状态
+2. RUNNABLE 就是线程在执行start()方法后就进入的状态，下面的几种状态都是从RUNNABLE 变换过去的，也就是new第一，RUNNABLE 一定是第二个状态，其次才是下面的几种状态
+3. WAITING 就是当此线程执行了wait()方法的时候，线程进入的状态，死死的等待，直到其他线程执行了notify()或者notifyAll()方法才继续执行。
+   注意：当线程执行wait()后，会释放锁，这跟sleep()不同，sleep()是不释放锁的。
+4. TIMED_WAITING 就是当线程执行了sleep()方法或者TimeUtil的sleep()方法，线程进入的状态
+5. BLOCKED就是当两个线程同时需要获取同一把锁，一个线程拿到了锁，那么另一个线程就进入了BLOCKED状态，等待拿到锁的线程执行完毕，才继续执行。
+6. TERMINATED就是线程结束后的状态
 
 ![image-20201206214439641](图片/image-20201206214439641.png)
 
 接下来就看一下线程类中和线程生命周期相关的方法。
 
-#### 1.4.1 sleep方法
+#### 1.4.2 sleep方法
 
 调用 sleep 方法会让线程让出自己获取的cpu资源，进入一个计时等待的状态，**等到计时完毕，会进入就绪状态**。等待重新竞争到资源后进入运行状态。
 
-#### 1.4.2 yield方法
+测试代码：
+
+```java
+/**
+ * SleepTest 类是 sleep方法测试
+ *
+ * @author dongyinggang
+ * @date 2021-02-20 08:57
+ **/
+public class SleepTest {
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread t = new Thread(() -> {
+            System.out.println("sub is running");
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        System.out.println("子线程状态" + t.getState());
+        t.start();
+        int i = 0;
+        int time = 5;
+        while (i < time) {
+            i++;
+            System.out.println("子线程状态" + t.getState());
+            Thread.sleep(100);
+        }
+    }
+}
+```
+
+测试结果：
+
+![image-20210220094615809](图片/image-20210220094615809.png)
+
+可以看到子线程的状态变化如上图，分析如下：
+
+1. 子线程创建但未调用 start() 方法时，处于 **NEW** 状态
+2. 调用 start() 方法，子线程获取到运行所需的资源，子线程进入 **RUNNABLE** 状态，执行了 run() 方法
+3. 子线程在 run() 方法中调用了 sleep() 进入 **TIMED_WAITING** 状态
+4. sleep() 的时间结束后，子线程执行完毕，进入了 **TERMINATED** 状态，子线程终止。
+5. 主线程执行完毕，主线程终止，进程结束。
+
+需要注意的是，sleep() 方法不会释放锁，进入睡眠状态的线程依旧持有获取到的锁。
+
+测试代码：
+
+```java
+		/**
+     * testLock 方法是 测试sleep方法不释放锁
+     *
+     * @author dongyinggang
+     * @date 2021/2/20 10:24
+     */
+    private static void testLock(){
+
+        Object object = new Object();
+
+        new Thread(()->{
+            System.out.println("线程A竞争锁ing...");
+            synchronized (object){
+                System.out.println("子线程A获取到object锁,sleep时不释放");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("子线程A执行完毕,sleep结束,释放object锁");
+            }
+        }).start();
+
+        new Thread(()->{
+            System.out.println("线程B竞争锁ing...");
+            synchronized (object){
+                System.out.println("子线程B获取到object锁,sleep时不释放");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("子线程B执行完毕,sleep结束,释放object锁");
+            }
+        }).start();
+    }
+```
+
+运行结果如下：
+
+![image-20210220104418630](图片/image-20210220104418630.png)
+
+两个子线程均需要获取到 object 这个对象锁之后才能够执行，它们同时调用 start() 方法，先获取到对象锁的子线程会先执行，执行过程如下：
+
+**假设子线程A先获取到了object锁**
+
+1. 线程A竞争得到了 object 对象锁，输出"子线程A获取到object锁,sleep时不释放"。
+2. 线程A调用 Thread.sleep(1000) 睡眠 1s，此时线程进入 TIME_WAITING 状态，但依旧持有 object 锁。
+3. 线程B尝试获取锁，但无法成功，因此始终不能执行加锁代码块。
+4. 线程A的计时等待状态结束，进入就绪状态，依然持有锁，获取到时间片后，执行同步代码块，执行结束后释放锁
+5. 线程B获取到 object 对象锁，开始执行同步代码块，执行结束后进程结束。
+
+#### 1.4.3 yield方法
 
 调用 yield 方法会让出当前资源，让调用 yield 的线程进入就绪状态，和其他线程一起重新竞争资源，因此，yield 方法不能确保自己真正让出。
 
-#### 1.4.3 join 方法
+测试代码：
 
-调用 join 方法，会等待该线程执行完毕后，才会执行别的线程，会让其他线程处于等待状态。
+```java
+/**
+ * YieldTest 类是 yield方法测试
+ *
+ * @author dongyinggang
+ * @date 2021-02-20 11:03
+ **/
+public class YieldTest {
 
-#### 1.4.4 interrupt方法
+    public static void main(String[] args) {
+        Object object = new Object();
+
+        new Thread(() -> {
+            synchronized (object) {
+                System.out.println("子线程A获取到object锁,yield时释放");
+              	
+                Thread.yield();
+                System.out.println("子线程A执行完毕,yield结束,再次获取到对象锁后继续执行");
+            }
+        }).start();
+
+        new Thread(() -> {
+            synchronized (object) {
+                System.out.println("子线程B获取到object锁,yield时释放");
+                Thread.yield();
+                System.out.println("子线程B执行完毕,yield结束,再次获取到对象锁后继续执行");
+            }
+        }).start();
+    }
+}
+```
+
+运行结果如下：
+
+![image-20210220111605699](图片/image-20210220111605699.png)
+
+尽管子线程A调用了yield方法，进行了锁的释放，但在之后的竞争中，依然是线程A竞争到了对象锁 object，yield对于输出结果的影响基本为0。
+
+虽然礼让了，但又通过竞争获取到了对应资源。
+
+#### 1.4.4 join 方法
+
+调用 join 方法，挂起当前线程，执行完目标线程后（join方法的调用者线程），才继续执行当前线程。
+
+测试代码：
+
+```java
+/**
+ * JoinTest 类是 join 方法测试
+ * 挂起当前线程，等待目标线程结束
+ *
+ * @author dongyinggang
+ * @date 2021-02-20 11:17
+ **/
+public class JoinTest {
+    public static void main(String[] args) throws InterruptedException {
+        Thread t = new Thread(() -> {
+            System.out.println("子线程执行中...");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("子线程执行结束");
+        });
+        System.out.println("主线程正在执行,子线程调用join后等待子线程执行完毕才会继续执行");
+        t.start();
+        // 当执行t.join()时,主线程由于 join() 中调用了 wait() 方法而被阻塞
+        // 因此，会等待子线程执行完毕，isAlive()为false时,才跳出while循环,才能够继续进行主线程
+        t.join();
+        System.out.println("主线程在子线程结束后才继续执行");
+    }
+}
+
+```
+
+运行结果如下:
+
+![image-20210220112328455](图片/image-20210220112328455.png)
+
+子线程调用 join() 方法后，主线程处于 **Waiting** 状态，等待子线程执行结束后才继续执行。
+
+**join()方法原理**
+
+源码：
+
+```java
+		//join入口
+		public final void join() throws InterruptedException {
+        join(0);
+    }
+    /**
+   	 * 等待线程死亡的时间最多为{millis}毫秒，如果{millis}设置为0时，将意味着一直等待下去。
+     * 此实现使用{this.isAlive()}为条件，循环调用{Object.wait()}方法
+     * 这里方法加了synchronized，因此会锁调用join方法的线程对象
+     */
+    public final synchronized void join(long millis)
+    throws InterruptedException {
+        long base = System.currentTimeMillis();
+        long now = 0;
+				
+        if (millis < 0) {
+            throw new IllegalArgumentException("timeout value is negative");
+        }
+				//直接调用join()时，就是走这里的逻辑
+        if (millis == 0) {
+            //只要线程处于存活状态，就始终调用 wait(0)
+            while (isAlive()) {
+                //调用wait方法，进入无限等待
+                wait(0);
+            }
+        } else {
+            while (isAlive()) {
+                long delay = millis - now;
+                if (delay <= 0) {
+                    break;
+                }
+                wait(delay);
+                now = System.currentTimeMillis() - base;
+            }
+        }
+    }
+```
+
+join() 方法另其他线程进入无线等待状态的逻辑：
+
+1. 子线程 start() 之后，调用 join() 方法
+2. 由于参数是空，实际调用了 join(0) ，通过while循环不断的调用 Object 类的 wait(0) 方法，**调用wait的代码，和调用wait的对象无关，只和调用wait的线程有关。**因此，虽然是子线程对象来实施了wait方法的调用，但实际主线程进入了由 while 和 wait(0) 引起的无线等待状态。直到 while 的循环条件被打破。
+3. **主线程是如何唤醒的呢？**当子线程执行完毕时，jvm在关闭线程之前会检测阻塞在子线程对象上的线程，这里就是主线程，然后执行notifyAll(),此时，主线程被唤醒，继续执行剩余代码。
+
+#### 1.4.5 wait() notify() notifyAll()
+
+尽管这三个方法都是 Object 的方法而非 Thread 的方法，但要涉及到线程之间的调度，就不可能绕开这三个方法。
+
+调用 wait() 使得线程等待某个条件满足，线程在等待时会被挂起，当其他线程的运行使得这个条件满足时，其它线程会调用 notify() 或者 notifyAll() 来唤醒挂起的线程。
+
+
+
+#### 1.4.5 interrupt方法
 
 Thread类中有个被设置为过时的stop()方法，该方法是之前版本用来中断线程的方法。现在已经没有强制线程终止的方法了。
 
@@ -412,3 +660,6 @@ public class ThreadInterruptTest {
 
 【2】[Java多线程（九）—— interrupt()和线程终止方式](https://www.cnblogs.com/xiaoxi/p/7004539.html)
 
+【3】[Java线程的6个状态](https://blog.csdn.net/qq_42856647/article/details/109790071)
+
+【4】[JAVA中JOIN和WAIT的关系](https://blog.csdn.net/starryninglong/article/details/81144894)
