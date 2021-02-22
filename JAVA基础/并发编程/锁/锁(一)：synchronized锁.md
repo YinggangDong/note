@@ -42,7 +42,7 @@ synchronized一般可以用来修饰三种东西：
 
 2.静态方法
 
-3.代码块
+3.代码块（锁不一样的对象，或者类）
 
 被加锁的方法和代码块均放在一个类中，用来支持演示各种锁的情形，其实例代码如下：
 
@@ -139,7 +139,7 @@ public class SynObj {
 
 ```
 
-### 4.1 修饰实例方法
+### 4.1 同步实例方法
 
 修饰实例方法时，锁的是对象实例，锁一个对象实例的时候可以达到锁的目的，但多个实例时会出现并发问题。看一下示例代码：
 
@@ -217,7 +217,7 @@ public class SynInstanceRunnable implements Runnable {
 
 ![image-20201209194842277](图片/image-20201209194842277.png)
 
-### 4.2 静态方法
+### 4.2 同步静态方法
 
 当使用synchronized修饰静态方法时，锁的是类，而非对象， 此时任何尽管我们写了让两个线程分别去获取一个对象实例进行方法调用，也始终是只有第一个线程在执行，第二个线程始终无法获取到锁来进行输出。
 
@@ -284,7 +284,7 @@ public class SynStaticRunnable implements Runnable {
 
 如果使用实例来调用静态方法,编译器会提示但运行不会报错。输出和上面的一致。我们每次都是起了两个线程，在我们没有指定名称的情况下，两个线程名称分别为Thread-0和Thread-1，每次输出的名称只有一个，但并不是固定的，哪个资源先获取到了锁，就会死死抱住不放开。
 
-### 4.3 锁代码块
+### 4.3 同步一个代码块
 
 锁代码块的情况相对要复杂一点点，这里主要看四种情况：
 
@@ -292,7 +292,7 @@ public class SynStaticRunnable implements Runnable {
 2. 两个线程，两个对象，代码块加锁，锁 this 对象
 3. 两个线程，一个对象，两个方法分别锁 this 对象
 
-4. 两个线程,一个对象的两个实例方法,锁了不同的Object
+4. 两个线程，一个对象的两个实例方法，锁了不同的Object
 
 首先，这次实现Runnable接口的对象如下：
 
@@ -409,8 +409,76 @@ private static void twoThreadSynTwoObj(){
 }
 ```
 
+### 4.4 同步一个类
+
+当 synchronized 锁代码块的时候，除了直接锁对象的形式外，还可以锁类时，形如 synchronized(Object.class), 这样的锁和修饰静态方法比较像，作用于整个类。
+
+也就是说两个线程调用同一个类的不同对象上的这种同步语句，也会进行同步。因为只能有一个线程持有这个类的资源。
+
+示例代码如下：
+
+```java
+/**
+ * SynClass 类是 锁一个类
+ *
+ * @author dongyinggang
+ * @date 2021-02-22 09:01
+ **/
+public class SynClass {
+
+    /**
+     * synClass 方法是 使用synchronized同步一个类
+     * 作用于整个类，也就是说两个线程调用同一个类的不同对象上的这种同步语句，也会进行同步。
+     * 某个线程竞争到类锁后，其他线程就不能执行了，必须等待目标线程释放
+     *
+     * @author dongyinggang
+     * @date 2021/2/22 9:54
+     */
+    private void synClass() {
+        synchronized (SynClass.class) {
+            for (int i = 0; i < 5; i++) {
+                System.out.println(Thread.currentThread().getName() + " synClass 运行中");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println(Thread.currentThread().getName() + "当前线程执行完毕");
+        }
+    }
+
+    public static void main(String[] args) {
+        SynClass synClass1 = new SynClass();
+        SynClass synClass2 = new SynClass();
+        //创建一个线程池
+        ExecutorService executorService = ThreadUtil.buildThreadExecutor(2);
+        //始终是一个线程在执行,sleep时不释放锁,所以始终是一个线程在执行
+        executorService.execute(synClass1::synClass);
+        executorService.execute(synClass2::synClass);
+        //执行完毕后,终止线程池,如果不执行,则进程不会结束
+        executorService.shutdown();
+        System.out.println("主线程执行完毕");
+    }
+
+}
+```
+
+执行结果如下：
+
+![image-20210222104238171](图片/image-20210222104238171.png)
+
+1. 声明两个SynClass对象，分别是 synClass1 和 synClass2 。
+
+2. 通过线程池创建两个线程，分别是 test-t1 和 test-t2 ，分别调用第1步中声名的 synClass1 和 synClass2 的 synClass() 方法
+3. 由于通过 synchronized 对 SynClass.class 进行加锁，锁了类，因此只有当首先获取到 SynClass 类资源的线程执行完毕后，另一个线程才能够获取到  SynClass 类资源进行执行。
+4. 执行完毕后，关闭线程池，进程结束。
+
 ## 参考内容
 
 【1】[synchronized到底锁住的是谁？](https://www.cnblogs.com/yulinfeng/p/11020576.html)
 
 【2】三歪整理的多线程知识
+
+【3】[Java 并发](https://github.com/CyC2018/CS-Notes/blob/master/notes/Java%20%E5%B9%B6%E5%8F%91.md#synchronized)
+
