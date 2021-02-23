@@ -521,3 +521,5 @@ public class SynClass {
 【4】[深入理解synchronized底层原理，一篇文章就够了！](https://cloud.tencent.com/developer/article/1465413)
 
 【5】[深入分析Synchronized原理](https://www.cnblogs.com/1013wang/p/11806019.html)
+
+【6】[通过一个故事理解可重入锁的机制](https://www.cnblogs.com/gxyandwmm/p/9387833.html)
