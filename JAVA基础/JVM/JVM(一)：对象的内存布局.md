@@ -247,3 +247,5 @@ private static void arrayObjectHeader(){
 【4】[CPU Cache与缓存行](https://blog.csdn.net/u010983881/article/details/82704733)
 
 【5】[聊一聊JAVA指针压缩的实现原理（图文并茂，让你秒懂）](https://blog.csdn.net/liujianyangbj/article/details/108049482)
+
+【6】[JVM——深入分析对象的内存布局](https://www.cnblogs.com/zhengbin/p/6490953.html)
