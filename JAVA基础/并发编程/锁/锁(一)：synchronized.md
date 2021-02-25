@@ -1,7 +1,5 @@
 # 锁(一)：synchronized
 
-[toc]
-
 ## 1 synchronized是什么？
 
 synchronized是Java的一个**实现线程同步的关键字**，它能够将**代码块(方法)锁起来**。
