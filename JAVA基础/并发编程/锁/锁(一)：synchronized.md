@@ -56,6 +56,8 @@ synchronized和volatile都具有有序性，Java允许编译器和处理器对�
 
 ## 3 synchronized的原理
 
+### 3.1 JVM中的锁标记
+
 在理解锁实现原理之前先了解一下Java的对象头和Monitor，在JVM中，对象是分成三部分存在的：对象头、实例数据、对齐填充。
 
 ![image-20210222144223756](图片/image-20210222144223756.png)
@@ -71,6 +73,69 @@ synchronized和volatile都具有有序性，Java允许编译器和处理器对�
 锁也分不同状态，JDK6之前只有两个状态：无锁、有锁（重量级锁），而在JDK6之后对synchronized进行了优化，新增了两种状态，总共就是四个状态：**无锁状态、偏向锁、轻量级锁、重量级锁**，其中无锁就是一种状态了。锁的类型和状态在对象头`Mark Word`中都有记录，在申请锁、锁升级等过程中JVM都需要读取对象的`Mark Word`数据。
 
 每一个锁都对应一个monitor对象，在HotSpot虚拟机中它是由ObjectMonitor实现的（C++实现）。每个对象都存在着一个monitor与之关联，对象与其monitor之间的关系有存在多种实现方式，如monitor可以与对象一起创建销毁或当线程试图获取对象锁时自动生成，但当一个monitor被某个线程持有后，它便处于锁定状态。
+
+有如下类：
+
+```java
+/**
+ * SynBasic 类是 synchronized 基础类
+ *
+ * @author dongyinggang
+ * @date 2021-03-03 11:04
+ **/
+public class SynBasic {
+
+    /**
+     * test 方法是 测试 synchronized 语义
+     *
+     * @author dongyinggang
+     * @date 2021/3/3 11:06
+     */
+    private static void test() {
+        synchronized ("synObj") {
+            System.out.println("just test synchronized");
+        }
+    }
+}
+```
+
+对这个类进行编译后查看字节码文件，步骤如下：
+
+1. 在类的 java 文件所在目录下打开 cmd
+
+2. 通过 javac 命令完成编译，生成对应的class文件，命令为：**javac -encoding UTF-8 SynBasic.java**
+3. 通过 javap -c 命令查看生成的 class 文件对应的字节码，命令为：**javap -c SynBasic.class**
+
+**ps：需要注意的是，private 类型的方法不能够被 javap -c 展示出来**
+
+字节码内容如下：
+
+![image-20210303161504140](图片/image-20210303161504140.png)
+
+可以看到第 4 、14 和 20 步分别进行了 monitorenter 和 monitorexit ，其中 14 和 20 步均为 monitorexit 的原因是，如果成功，在 14 步进行锁的释放后直接进行 15 步的 goto 跳转，会直接跳到 23 的return语句，结束掉整个方法，19 到 22 步则为编译器自动产生的异常处理器，会执行 monitorexit 和之前的 monitorenter 配对，保证能够正常的释放锁资源。
+
+```java
+  public void test();
+    Code:
+       0: ldc           #2                  // class cn/dyg/keyword/syn/SynBasic
+       2: dup
+       3: astore_1
+       4: monitorenter
+       5: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;
+       8: ldc           #4                  // String just test synchronized
+      10: invokevirtual #5                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+      13: aload_1
+      14: monitorexit
+      15: goto          23
+      18: astore_2
+      19: aload_1
+      20: monitorexit
+      21: aload_2
+      22: athrow
+      23: return
+```
+
+### 3.2JVM 对 synchronized 的优化
 
 ## 4 synchronized的使用
 
