@@ -56,9 +56,15 @@ synchronized和volatile都具有有序性，Java允许编译器和处理器对�
 
 ## 3 synchronized的原理
 
-### 3.1 JVM中的锁标记
+### 3.1 JVM中锁的实现细节
 
-在理解锁实现原理之前先了解一下Java的对象头和Monitor，在JVM中，对象是分成三部分存在的：对象头、实例数据、对齐填充。
+数据同步需要依赖锁，那锁的同步又依赖谁？**synchronized给出的答案是在软件层面依赖JVM，而j.u.c.Lock给出的答案是在硬件层面依赖特殊的CPU指令**。
+
+在理解锁实现原理之前先了解一下Java的对象头和Monitor。
+
+#### 3.1.1 对象头
+
+在JVM中，对象是分成三部分存在的：对象头、实例数据、对齐填充。
 
 ![image-20210222144223756](图片/image-20210222144223756.png)
 
@@ -72,7 +78,9 @@ synchronized和volatile都具有有序性，Java允许编译器和处理器对�
 
 锁也分不同状态，JDK6之前只有两个状态：无锁、有锁（重量级锁），而在JDK6之后对synchronized进行了优化，新增了两种状态，总共就是四个状态：**无锁状态、偏向锁、轻量级锁、重量级锁**，其中无锁就是一种状态了。锁的类型和状态在对象头`Mark Word`中都有记录，在申请锁、锁升级等过程中JVM都需要读取对象的`Mark Word`数据。
 
-每一个锁都对应一个monitor对象，在HotSpot虚拟机中它是由ObjectMonitor实现的（C++实现）。每个对象都存在着一个monitor与之关联，对象与其monitor之间的关系有存在多种实现方式，如monitor可以与对象一起创建销毁或当线程试图获取对象锁时自动生成，但当一个monitor被某个线程持有后，它便处于锁定状态。
+在64位JVM中对象头是这么存的：
+
+![image-20210224091947546](图片/image-20210224091947546.png)
 
 有如下类：
 
@@ -120,22 +128,103 @@ public class SynBasic {
        0: ldc           #2                  // class cn/dyg/keyword/syn/SynBasic
        2: dup
        3: astore_1
-       4: monitorenter
-       5: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;
+       4: monitorenter											//申请获得对象的内置锁
+       5: getstatic     #3                  
        8: ldc           #4                  // String just test synchronized
-      10: invokevirtual #5                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+      10: invokevirtual #5                  
       13: aload_1
-      14: monitorexit
+      14: monitorexit												//释放对象内置锁
       15: goto          23
       18: astore_2
       19: aload_1
-      20: monitorexit
+      20: monitorexit												//释放对象内置锁
       21: aload_2
       22: athrow
       23: return
 ```
 
-### 3.2JVM 对 synchronized 的优化
+执行 monitorenter 和 monitorexit 操作，实际就是在对内存中的目标对象做 lock 和 unlock 操作，一旦执行了 lock 操作，其他线程就不再能获取到该对象的锁了。
+
+![image-20210304080622740](图片/image-20210304080622740.png)
+
+#### 3.1.2 monitor
+
+在 Java 的设计中，每一个对象在生成时，就带了一把看不见的锁，通常称之为“内部锁”，或者“Monitor 锁（监视器锁）”，或者“Intrinsic lock（内部锁）”。
+
+JVM规范规定JVM基于进入和退出Monitor对象来实现方法同步和代码块同步，但两者的实现细节不一样。代码块同步是使用monitorenter和monitorexit指令实现，而方法同步是使用另外一种方式实现的，细节在JVM规范里并没有详细说明，但是方法的同步同样可以使用这两个指令来实现。
+
+monitorenter指令是在编译后插入到同步代码块的开始位置，而monitorexit是插入到方法结束处和异常处， JVM要保证每个monitorenter必须有对应的monitorexit与之配对。任何对象都有一个 monitor 与之关联，当且一个monitor 被持有后，它将处于锁定状态。线程执行到 monitorenter 指令时，将会尝试获取对象所对应的 monitor 的所有权，即尝试获得对象的锁。
+
+每一个锁都对应一个monitor对象，在HotSpot虚拟机中它是由ObjectMonitor实现的（C++实现）。每个对象都存在着一个monitor与之关联，对象与其monitor之间的关系有存在多种实现方式，如monitor可以与对象一起创建销毁或当线程试图获取对象锁时自动生成，但当一个monitor被某个线程持有后，它便处于锁定状态。
+
+![image-20210304145153001](图片/image-20210304145153001.png)
+
+objectMonitor的构成如下：
+
+```javascript
+ObjectMonitor() {
+    _header       = NULL;
+    _count        = 0;  //锁计数器
+    _waiters      = 0,  //等待线程数
+    _recursions   = 0;  //线程的重入次数
+    _object       = NULL; //监视器锁寄生的对象。锁不是平白出现的，而是寄托存储于对象中。
+    _owner        = NULL; //锁的拥有者线程
+    _WaitSet      = NULL; //处于wait状态的线程，会被加入到_WaitSet
+    _WaitSetLock  = 0 ;
+    _Responsible  = NULL ;
+    _succ         = NULL ;
+    _cxq          = NULL ; //多线程竞争锁进入时的单向链表
+    FreeNext      = NULL ;
+    _EntryList    = NULL ; //处于等待锁block状态的线程，会被加入到该列表
+    _SpinFreq     = 0 ;
+    _SpinClock    = 0 ;
+    OwnerIsThread = 0 ;    // 监视器前一个拥有者线程的ID
+  }
+```
+
+```java
+ObjectMonitor 中有两个队列，_WaitSet 和 _EntryList，用来保存 ObjectWaiter 对象列表( 每个等待锁的线程都会被封装成 ObjectWaiter 对象)，_owner 指向持有 ObjectMonitor 对象的线程。
+
+当多个线程同时访问一段同步代码时，首先会进入 _EntryList 集合，当线程获取到对象的 monitor 后进入 _owner 区域并把 monitor 中的 _owner 变量设置为当前线程同时 monitor 中的计数器 count 加1。
+
+若线程调用 wait() 方法，将释放当前持有的 monitor，_owner 变量恢复为 null，_count 自减1，同时该线程进入 _WaitSet 集合中等待被唤醒。
+
+若当前线程执行完毕也将释放 monitor (锁)并复位变量的值，以便其他线程进入获取 monitor(锁)。
+```
+
+竞争逻辑图大致如下：
+
+![image-20210304145746900](图片/image-20210304145746900.png)
+
+### 3.2 JVM 对 synchronized 的优化
+
+#### 3.2.1 锁膨胀
+
+上面讲到锁有四种状态，并且会因实际情况进行膨胀升级，其膨胀方向是：**无锁——>偏向锁——>轻量级锁——>重量级锁**，并且膨胀方向不可逆。
+
+**偏向锁**
+
+一句话总结它的作用：**减少统一线程获取锁的代价**。在大多数情况下，锁不存在多线程竞争，总是由同一线程多次获得，那么此时就是偏向锁。
+
+核心思想：
+
+如果一个线程获得了锁，那么锁就进入偏向模式，此时`Mark Word`的结构也就变为偏向锁结构，**当该线程再次请求锁时，无需再做任何同步操作，即获取锁的过程只需要检查**`Mark Word`**的锁标记位为偏向锁以及当前线程ID等于**`Mark Word`**的ThreadID即可**，这样就省去了大量有关锁申请的操作。
+
+**轻量级锁**
+
+轻量级锁是由偏向锁升级而来，当存在第二个线程申请同一个锁对象时，偏向锁就会立即升级为轻量级锁。注意这里的第二个线程只是申请锁，不存在两个线程同时竞争锁，可以是一前一后地交替执行同步块。
+
+**重量级锁**
+
+重量级锁是由轻量级锁升级而来，当**同一时间**有多个线程竞争锁时，锁就会被升级成重量级锁，此时其申请锁带来的开销也就变大。
+
+重量级锁一般使用场景会在追求吞吐量，同步块或者同步方法执行时间较长的场景。
+
+**ps:只有在重量级锁的情况下，才会使用 Monitor 进行锁的实现。**
+
+#### 3.2.2 锁消除
+
+消除锁是虚拟机另外一种锁的优化，这种优化更彻底，在JIT编译时，对运行上下文进行扫描，去除不可能存在竞争的锁。比如下面代码的method1和method2的执行效率是一样的，因为object锁是私有变量，不存在所得竞争关系。
 
 ## 4 synchronized的使用
 
@@ -590,3 +679,5 @@ public class SynClass {
 【5】[深入分析Synchronized原理](https://www.cnblogs.com/1013wang/p/11806019.html)
 
 【6】[通过一个故事理解可重入锁的机制](https://www.cnblogs.com/gxyandwmm/p/9387833.html)
+
+【7】[关于Monitor对象在sychronized实现中的应用](https://blog.csdn.net/super_x_man/article/details/81741073)

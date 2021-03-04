@@ -18,7 +18,7 @@ String
 Number 部分子类，如 Long 和 Double 等数值包装类型，BigInteger 和 BigDecimal 等大数据类型。但同为 Number 的原子类 AtomicInteger 和 AtomicLong 则是可变的。
 对于集合类型，可以使用 Collections.unmodifiableXXX() 方法来获取一个不可变的集合。
 
-例外：this逃逸,详情见 [参考【2】](#reference2) 
+例外：this逃逸,详情见 [参考【2】](#reference2) 
 
 2. **绝对线程安全**
 
@@ -50,8 +50,14 @@ Number 部分子类，如 Long 和 Double 等数值包装类型，BigInteger 和
 
 互斥是实现同步的一种手动，临界区（Critical Section）、互斥量（Mutex）和信号量（Semaphore）都是主要的互斥实现方式。
 
+Java中最基本的互斥同步手段就是 synchronized 关键字，属于一个重量级操作。
+
+除了 synchronized 之外，我们还可以使用 `java.util.concurrent` 包中的重入锁（`ReentrantLock`）来实现同步。代码区别上如下：
+
+
+
 ## 参考内容
 
 【1】深入理解 Java 虚拟机（第二版）
 
-【2】<a name="reference2">[this引用逃逸](https://www.cnblogs.com/jian0110/p/9369096.html) </a>
+【2】<a name="reference2">[this引用逃逸](https://www.cnblogs.com/jian0110/p/9369096.html) </a>
