@@ -54,7 +54,42 @@ Java中最基本的互斥同步手段就是 synchronized 关键字，属于一�
 
 除了 synchronized 之外，我们还可以使用 `java.util.concurrent` 包中的重入锁（`ReentrantLock`）来实现同步。代码区别上如下：
 
+synchronized
 
+```java
+		/**
+     * synchronizedBlockObj1 和 synchronizedBlockObj2 方法是 两个方法分别锁不同的对象
+     * 这样对两个对象分别加锁，实际上是互不影响的，可以分别执行，不会阻塞另一个线程
+     *
+     * @author dongyinggang
+     * @date 2020/12/9 19:41
+     */
+    void synchronizedBlockObj1() {
+        // 修饰代码块
+        synchronized (lock1){
+            for (int i = 0; i < FIVE_INT; i++) {
+                System.out.println(Thread.currentThread().getName());
+            }
+        }
+    }
+```
+
+lock
+
+```java
+private void func() {
+    lock.lock();
+    try {
+        for (int i = 0; i < 10; i++) {
+            System.out.println(Thread.currentThread().getName() + " 输出 " + i);
+        }
+        System.out.println(Thread.currentThread().getName() + " 输出完毕");
+    } finally {
+        lock.unlock(); // 确保释放锁，从而避免发生死锁。
+        System.out.println(Thread.currentThread().getName() + " 释放锁");
+    }
+}
+```
 
 ## 参考内容
 

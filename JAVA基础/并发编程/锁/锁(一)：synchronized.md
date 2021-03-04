@@ -82,6 +82,10 @@ synchronized和volatile都具有有序性，Java允许编译器和处理器对�
 
 ![image-20210224091947546](图片/image-20210224091947546.png)
 
+详情可参见：
+
+
+
 有如下类：
 
 ```java
@@ -681,3 +685,7 @@ public class SynClass {
 【6】[通过一个故事理解可重入锁的机制](https://www.cnblogs.com/gxyandwmm/p/9387833.html)
 
 【7】[关于Monitor对象在sychronized实现中的应用](https://blog.csdn.net/super_x_man/article/details/81741073)
+
+【8】[JDK15 默认关闭偏向锁优化原因](https://blog.csdn.net/xiaoy990/article/details/112893646)
+
+【9】<span id ='ck9'>[从对象头来了解synchronize关键字里的偏向锁，轻量级锁，重量级锁](https://blog.csdn.net/fangjialue/article/details/98622166)</span>
