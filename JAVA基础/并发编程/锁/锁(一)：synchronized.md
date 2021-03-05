@@ -82,9 +82,9 @@ synchronized和volatile都具有有序性，Java允许编译器和处理器对�
 
 ![image-20210224091947546](图片/image-20210224091947546.png)
 
-详情可参见：
+详情可见参考内容：[从对象头来了解synchronize关键字里的偏向锁，轻量级锁，重量级锁](https://blog.csdn.net/fangjialue/article/details/98622166)
 
-
+其中打印了对象的 hashcode 等，将对象头信息和计算出的 hashcode 值进行了对应。
 
 有如下类：
 
@@ -214,9 +214,23 @@ ObjectMonitor 中有两个队列，_WaitSet 和 _EntryList，用来保存 Object
 
 如果一个线程获得了锁，那么锁就进入偏向模式，此时`Mark Word`的结构也就变为偏向锁结构，**当该线程再次请求锁时，无需再做任何同步操作，即获取锁的过程只需要检查**`Mark Word`**的锁标记位为偏向锁以及当前线程ID等于**`Mark Word`**的ThreadID即可**，这样就省去了大量有关锁申请的操作。
 
+如果不相等，则会用 CAS 来尝试修改当前的线程 ID，如果 CAS 修改成功，那还能获取到锁，执行同步代码。
+
+如果 CAS 失败了，说明存在竞争环境，此时会对偏向锁撤销，升级为轻量级锁。
+
+![image-20210305162808758](图片/image-20210305162808758.png)
+
 **轻量级锁**
 
 轻量级锁是由偏向锁升级而来，当存在第二个线程申请同一个锁对象时，偏向锁就会立即升级为轻量级锁。注意这里的第二个线程只是申请锁，不存在两个线程同时竞争锁，可以是一前一后地交替执行同步块。
+
+在轻量级锁状态下，当前线程会在栈帧下创建 Lock Record，Lock Record 会把 Mark Word 的信息拷贝进去，且有个 Owner 指针指向加锁的对象。
+
+线程执行到同步代码时，则用 CAS 视图将 Mark Word 的指向到线程栈帧的 Lock Record，假设 CAS 修改成功，则获取得到轻量级锁。
+
+假设修改失败，则自旋（重试），自旋一定次数后，则升级为重量级锁。
+
+![image-20210305163819093](图片/image-20210305163819093.png)
 
 **重量级锁**
 
@@ -225,6 +239,12 @@ ObjectMonitor 中有两个队列，_WaitSet 和 _EntryList，用来保存 Object
 重量级锁一般使用场景会在追求吞吐量，同步块或者同步方法执行时间较长的场景。
 
 **ps:只有在重量级锁的情况下，才会使用 Monitor 进行锁的实现。**
+
+**膨胀过程**
+
+膨胀过程示意图如下：
+
+![image-20210305164420073](图片/image-20210305164420073.png)
 
 #### 3.2.2 锁消除
 
@@ -688,4 +708,4 @@ public class SynClass {
 
 【8】[JDK15 默认关闭偏向锁优化原因](https://blog.csdn.net/xiaoy990/article/details/112893646)
 
-【9】<span id ='ck9'>[从对象头来了解synchronize关键字里的偏向锁，轻量级锁，重量级锁](https://blog.csdn.net/fangjialue/article/details/98622166)</span>
+【9】[从对象头来了解synchronize关键字里的偏向锁，轻量级锁，重量级锁](https://blog.csdn.net/fangjialue/article/details/98622166)
