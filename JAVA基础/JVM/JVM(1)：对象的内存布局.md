@@ -53,11 +53,17 @@ Mark Word在不同的锁状态下存储的内容不同，在32位JVM中是这么
 
 **拓展1：当由无锁态转变为其他状态时，原对象头信息去哪了？**
 
+偏向锁：在未进行哈希计算的情况下，偏向锁状态将原哈希值的存储位置用来存储线程id和 epoch 内容了，若进行了哈希计算，则进入不了偏向锁状态。
 
+轻量级锁：原 Mark Word 内容被复制到了获取到锁的线程的栈创建的 Lock Record 对象中。
 
-**拓展2：膨胀式的锁分配策略**
+重量级锁：原 Mark Word 内容被复制到了互斥锁 Monitor 对象中。`HotSpot` 虚拟机的 `Monitor` 的实现 `ObjectMonitor` 类(C++类)里有字段可以记录非加锁状态下的`Mark Word`，其中可以存储identity hash code的值。或者简单说就是重量锁可以存下identity hash code。
 
+详情可参考：[当Java对象处在偏向锁、轻量锁、重量级锁状态时，Mark Word值存储在哪？](https://blog.sakuradon.com/index.php/archives/985/)
 
+**拓展2：锁得膨胀过程**
+
+![image-20210306162532178](图片/image-20210306162532178.png)
 
 #### Klass Pointer
 
@@ -264,3 +270,4 @@ private static void arrayObjectHeader(){
 
 【7】[详解大端模式和小端模式](https://www.cnblogs.com/little-white/p/3236548.html)
 
+【8】[当Java对象处在偏向锁、轻量锁、重量级锁状态时，Mark Word值存储在哪？](https://blog.sakuradon.com/index.php/archives/985/)

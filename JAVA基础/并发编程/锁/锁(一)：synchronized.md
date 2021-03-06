@@ -248,7 +248,77 @@ ObjectMonitor 中有两个队列，_WaitSet 和 _EntryList，用来保存 Object
 
 #### 3.2.2 锁消除
 
-消除锁是虚拟机另外一种锁的优化，这种优化更彻底，在JIT编译时，对运行上下文进行扫描，去除不可能存在竞争的锁。比如下面代码的method1和method2的执行效率是一样的，因为object锁是私有变量，不存在所得竞争关系。
+消除锁是虚拟机另外一种锁的优化，这种优化更彻底，在JIT编译时，对运行上下文进行扫描，去除不可能存在竞争的锁。比如下面代码，因为 object 没有逃逸出 synRemoveTest() 方法，任何调用该方法的地方都会生成一个新的 object 对象，因此不存在锁得竞争关系。JVM 就会将这里的加锁操作给优化掉。
+
+JDK 8 默认开启了锁消除功能，如果想要取消的话，需要给 JVM 启动参数添加 -XX:-EliminateLocks
+
+```java
+/**
+ * SynRemove 类是 锁消除,JDK 对 synchronized 的优化措施
+ *
+ * @author dongyinggang
+ * @date 2021-03-04 15:17
+ **/
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
+@Threads(2)
+@State(Scope.Benchmark)
+public class SynRemove {
+
+    int x;
+
+    public static void main(String[] args) throws RunnerException {
+        Options options = new OptionsBuilder()
+                .include(SynRemove.class.getSimpleName())
+                .build();
+        new Runner(options).run();
+    }
+
+    @Benchmark
+    public void baseline() {
+        x++;
+    }
+
+    /**
+     * 虽然使用了 synchronized
+     * 但由于 obj 是局部变量，每次调用都会是新的对象，
+     * 因此实际会被优化，执行锁消除，和没有 synchronized 的代码效率一样高
+     * 如果锁消除被关闭：则会慢很多,JVM参数增加 -XX:-EliminateLocks
+     * 本测试结果是 10 倍数量级以上的差距
+     */
+    @Benchmark
+    public void locked() {
+        synchronized (new Object()) {
+            x++;
+        }
+    }
+}
+
+```
+
+测试结果如下：
+
+- 默认开启锁消除的结果：
+
+```java
+
+Benchmark           Mode  Cnt  Score   Error  Units
+SynRemove.baseline  avgt   10  3.683 ± 0.401  ns/op
+SynRemove.locked    avgt   10  3.750 ± 0.219  ns/op
+```
+
+- 手动关闭锁消除的结果：
+
+```
+Benchmark           Mode  Cnt   Score   Error  Units
+SynRemove.baseline  avgt   10   3.278 ± 0.177  ns/op
+SynRemove.locked    avgt   10  54.827 ± 2.687  ns/op
+```
+
+测试得到的 locked 方法的差距是 10 倍数量级的，能够直观感受到 JVM 的锁消除的优化成果。
 
 ## 4 synchronized的使用
 
@@ -709,3 +779,5 @@ public class SynClass {
 【8】[JDK15 默认关闭偏向锁优化原因](https://blog.csdn.net/xiaoy990/article/details/112893646)
 
 【9】[从对象头来了解synchronize关键字里的偏向锁，轻量级锁，重量级锁](https://blog.csdn.net/fangjialue/article/details/98622166)
+
+【10】[Java锁的膨胀过程以及一致性哈希对锁膨胀的影响](https://blog.csdn.net/qq_32099833/article/details/104506461)
