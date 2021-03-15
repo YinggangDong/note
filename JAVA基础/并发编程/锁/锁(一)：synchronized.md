@@ -210,6 +210,8 @@ ObjectMonitor 中有两个队列，_WaitSet 和 _EntryList，用来保存 Object
 
 一句话总结它的作用：**减少统一线程获取锁的代价**。在大多数情况下，锁不存在多线程竞争，总是由同一线程多次获得，那么此时就是偏向锁。
 
+**在绝大多数的情况下，偏向锁是有效的，这是基于HotSpot作者发现的“大多数锁只会由同一线程并发申请”的经验规律**。但在 JDK 15 中，默认禁用了偏向锁，维护这套膨胀体系的成本让它逐渐走向弃用的结果。
+
 核心思想：
 
 如果一个线程获得了锁，那么锁就进入偏向模式，此时`Mark Word`的结构也就变为偏向锁结构，**当该线程再次请求锁时，无需再做任何同步操作，即获取锁的过程只需要检查**`Mark Word`**的锁标记位为偏向锁以及当前线程ID等于**`Mark Word`**的ThreadID即可**，这样就省去了大量有关锁申请的操作。
@@ -319,6 +321,80 @@ SynRemove.locked    avgt   10  54.827 ± 2.687  ns/op
 ```
 
 测试得到的 locked 方法的差距是 10 倍数量级的，能够直观感受到 JVM 的锁消除的优化成果。
+
+#### 3.2.3 锁粗化
+
+锁粗化是虚拟机对另一种极端情况的优化处理，通过扩大锁的范围，避免反复加锁和释放锁。
+
+JDK 8 中默认开启锁粗化配置，手动关闭可以在 JVM 参数中添加`-XX:+EliminateLocks`。-XX:LoopUnrollLimit=1 
+
+测试代码：
+
+```java
+/**
+ * LockCoarsening 类是 锁粗化技术
+ *
+ * @author dongyinggang
+ * @date 2021-03-06 16:44
+ **/
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
+@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
+@Threads(2)
+@State(Scope.Benchmark)
+public class LockCoarsening {
+
+    public static void main(String[] args) throws RunnerException {
+        Options options = new OptionsBuilder()
+                .include(LockCoarsening.class.getSimpleName())
+                .build();
+        new Runner(options).run();
+    }
+
+    @Benchmark
+    public static void coarsening() {
+        Object object = new Object();
+        int count = 0;
+        for (int i = 0; i < 10000; i++) {
+            synchronized (object) {
+                count++;
+            }
+        }
+    }
+
+    @Benchmark
+    public static void base() {
+        Object object = new Object();
+        int count = 0;
+        synchronized (object) {
+            for (int i = 0; i < 10000; i++) {
+                count++;
+            }
+        }
+    }
+}
+
+```
+
+默认开启锁粗化执行结果：
+
+```cmd
+Benchmark                  Mode  Cnt       Score       Error  Units
+LockCoarsening.base        avgt   10      28.274 ±     5.146  ns/op
+LockCoarsening.coarsening  avgt   10  269036.487 ± 23290.201  ns/op
+```
+
+关闭锁粗化执行结果:
+
+```cmd
+Benchmark                  Mode  Cnt  Score   Error  Units
+LockCoarsening.base        avgt   10  0.554 ± 0.034  ns/op
+LockCoarsening.coarsening  avgt   10  1.071 ± 0.469  ns/op
+```
+
+可以看到，关闭后，base 方法的执行效率区别不大，但 coarsening() 方法的执行平均时长接近翻倍，由此可见锁粗化对于效率的提升。
 
 ## 4 synchronized的使用
 
