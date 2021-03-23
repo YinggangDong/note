@@ -326,7 +326,7 @@ SynRemove.locked    avgt   10  54.827 ± 2.687  ns/op
 
 锁粗化是虚拟机对另一种极端情况的优化处理，通过扩大锁的范围，避免反复加锁和释放锁。
 
-JDK 8 中默认开启锁粗化配置，手动关闭可以在 JVM 参数中添加`-XX:+EliminateLocks`。-XX:LoopUnrollLimit=1 
+JDK 8 中默认开启锁粗化配置，没有找到通过 JVM 参数进行禁用的方式。所以只能简单的测试一下多次获取锁和获取一次锁的效率区别。
 
 测试代码：
 
@@ -378,23 +378,13 @@ public class LockCoarsening {
 
 ```
 
-默认开启锁粗化执行结果：
-
-```cmd
-Benchmark                  Mode  Cnt       Score       Error  Units
-LockCoarsening.base        avgt   10      28.274 ±     5.146  ns/op
-LockCoarsening.coarsening  avgt   10  269036.487 ± 23290.201  ns/op
-```
-
-关闭锁粗化执行结果:
+可以看到`base()`方法和`coarsening()`方法的耗时基本一致，并没有像预期中两种写法产生巨大的性能差异。（无论是否通过`-XX:-EliminateLocks`关闭锁消除防止锁被优化，对结果无明显区分）。
 
 ```cmd
 Benchmark                  Mode  Cnt  Score   Error  Units
-LockCoarsening.base        avgt   10  0.554 ± 0.034  ns/op
-LockCoarsening.coarsening  avgt   10  1.071 ± 0.469  ns/op
+LockCoarsening.base        avgt   10  0.539 ± 0.052  ns/op
+LockCoarsening.coarsening  avgt   10  0.565 ± 0.117  ns/op
 ```
-
-可以看到，关闭后，base 方法的执行效率区别不大，但 coarsening() 方法的执行平均时长接近翻倍，由此可见锁粗化对于效率的提升。
 
 ## 4 synchronized的使用
 
