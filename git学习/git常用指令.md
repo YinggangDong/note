@@ -118,6 +118,8 @@ git push --set-upstream origin dev1.4
 
 需要注意的是，该指定远端分支的指令会自动执行一次git push，也就是说执行完该指令后不需要再另外执行git push了，改动已经完成推送到远端的操作。
 
+ps：这是已经在本地生成ssh文件并配置到github但依然要求输入用户名密码的情况下的解决方案，如果还没有做ssh的配置的话，请参考[GitHub如何配置SSH Key](https://blog.csdn.net/u013778905/article/details/83501204) 进行配置。
+
 ## 2.git branch 分支管理
 
 ### 分支是什么？
@@ -412,6 +414,14 @@ Switched to a new branch 'dev1.0.2'
 ```
 
 创建并捡出新的分支 dev1.0.2 。
+
+### 9.查看远程标签
+
+查看远程的标签列表。git pull 可以将远程的标签信息拉取到本地，所以该命令使用场景不多。
+
+```
+git ls-remote --tags origin
+```
 
 ## 4.git pull 更新与合并
 
