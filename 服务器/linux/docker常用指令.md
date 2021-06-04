@@ -111,3 +111,50 @@ $ docker logs -t --since="2018-02-08T13:23:37" CONTAINER_ID
 ```shell
 $ docker logs -t --since="2018-02-08T13:23:37" --until "2018-02-09T12:23:37" CONTAINER_ID
 ```
+
+## 进入容器
+
+### 语法：
+
+docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
+
+#### OPTIONS 参数说明：
+
+- -i: 让容器的标准输入（STDIN）始终保持打开，即使没有输入任何指令（没有附加）
+- -t: 分配一个终端，这样我们就可以使用命令来操作
+- -d: 分离模式，让命令在后台（指的是宿主后台）运行。
+- --user：指定用户运行，当我们需要 root 用户权限时可以指定。
+
+**【注】一般使用 -it 就足够了。**
+
+#### COMMAND 参数：
+
+command 指的是 shell 的类型，常见的有bash、sh、zsh，但是 Linux 系统大多数默认的是 bash 类型，新版 Mac OS 系统的话，默认的不再是 bash ，而是 zsh。
+
+#### 查看正在运行的容器
+
+1.docker ps
+
+执行结果如下：
+
+![image-20210604104437886](图片/image-20210604104437886.png)
+
+2.使用 exec 进入容器
+
+```
+docker exec -it mysql bash
+docker exec -it cba9 bash
+```
+
+
+就可以进入到容器内部的命令行界面。
+
+【注】mysql与 cba9都是容器的唯一标识，所以用哪个都可以。
+
+一般容器里面的 Linux是精简版的，没有 less 、cat 、vim/vi 等命令，如果需要的话可以自己安装，默认自带 APT 命令。
+
+
+### 退出容器
+
+直接使用命令 exit
+
