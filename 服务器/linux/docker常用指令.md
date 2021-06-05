@@ -112,9 +112,9 @@ $ docker logs -t --since="2018-02-08T13:23:37" CONTAINER_ID
 $ docker logs -t --since="2018-02-08T13:23:37" --until "2018-02-09T12:23:37" CONTAINER_ID
 ```
 
-## 进入容器
+## Docker进入并操作容器
 
-### 语法：
+### 进入容器
 
 docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
 
