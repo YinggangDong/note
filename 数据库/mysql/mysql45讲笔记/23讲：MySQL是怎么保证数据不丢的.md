@@ -54,11 +54,61 @@ write 和fsync的时机，是由参数sync_binlog控制的：
 1. **一种是，redo log buffer占用的空间即将达到 innodb_log_buffer_size一半的时候，后台线程会主动写盘。**注意，由于这个事务并没有提交，所以这个写盘动作只是write，而没有调用fsync，也就是只留在了文件系统的page cache。
 2. **另一种是，并行的事务提交的时候，顺带将这个事务的redo log buffer持久化到磁盘。**假设一个事务A执行到一半，已经写了一些redo log到buffer中，这时候有另外一个线程的事务B提交，如果innodb_flush_log_at_trx_commit设置的是1，那么按照这个参数的逻辑，事务B要把redo log buffer里的日志全部持久化到磁盘。这时候，就会带上事务A在redo log buffer里的日志一起持久化到磁盘。
 
-## 组提交
+## 组提交（group commit）
 
+日志逻辑序列号（log sequence number，LSN）
 
+LSN是单调递增的，用来对应redo log的一个个写入点。每次写入长度为length的redo log， LSN的值就会加上length。
+
+LSN也会写到InnoDB的数据页中，来确保数据页不会被多次执行重复的redo log。
+
+如下图所示，三个并发事务(trx1, trx2, trx3)在prepare 阶段，都写完redo log buffer，持久化到磁盘的过程，对应的LSN分别是50、120 和160。
+
+![image-20210624101757698](图片/image-20210624101757698.png)
+
+从图中可以看到，
+
+1. trx1是第一个到达的，会被选为这组的 leader；
+2. 等trx1要开始写盘的时候，这个组里面已经有了三个事务，这时候LSN也变成了160；
+3. trx1去写盘的时候，带的就是LSN=160，因此等trx1返回时，所有LSN小于等于160的redo log，都已经被持久化到磁盘；
+4. 这时候trx2和trx3就可以直接返回了。
+
+所以，一次组提交里面，组员越多，节约磁盘IOPS的效果越好。但如果只有单线程压测，那就只能老老实实地一个事务对应一次持久化操作了。
+
+在并发更新场景下，第一个事务写完redo log buffer以后，接下来这个fsync越晚调用，组员可能越多，节约IOPS的效果就越好。
+
+为了让一次fsync带的组员更多，MySQL有一个很有趣的优化：拖时间。
+
+![image-20210624102431769](图片/image-20210624102431769.png)
+
+图中，我把“写binlog”当成一个动作。但实际上，写binlog是分成两步的：
+
+1. 先把binlog从binlog cache中写到磁盘上的binlog文件；
+2. 调用fsync持久化。
+
+MySQL为了让组提交的效果更好，把redo log做fsync的时间拖到了步骤1之后。也就是说，上面的图变成了这样：
+
+![image-20210624102456151](图片/image-20210624102456151.png)
+
+这么一来，binlog也可以组提交了。在执行图5中第4步把binlog fsync到磁盘时，如果有多个事务的binlog已经写完了，也是一起持久化的，这样也可以减少IOPS的消耗。
+
+不过通常情况下第3步执行得会很快，所以binlog的write和fsync间的间隔时间短，导致能集合到一起持久化的binlog比较少，因此binlog的组提交的效果通常不如redo log的效果那么好。
+
+如果你想提升binlog组提交的效果，可以通过设置 binlog_group_commit_sync_delay 和 binlog_group_commit_sync_no_delay_count来实现。
+
+1. binlog_group_commit_sync_delay参数，表示延迟多少微秒后才调用fsync;
+2. binlog_group_commit_sync_no_delay_count参数，表示累积多少次以后才调用fsync。
+
+这两个条件是或的关系，也就是说只要有一个满足条件就会调用fsync。
+
+所以，当binlog_group_commit_sync_delay设置为0的时候，binlog_group_commit_sync_no_delay_count也无效了。
 
 ## 通过 WAL 机制解决 MySQL 性能瓶颈
+
+WAL机制主要得益于两个方面：
+
+1. redo log 和 binlog都是顺序写，磁盘的顺序写比随机写速度要快；
+2. 组提交机制，可以大幅度降低磁盘的IOPS消耗。
 
 **如果你的MySQL现在出现了性能瓶颈，而且瓶颈在IO上，可以通过哪些方法来提升性能呢？**
 
