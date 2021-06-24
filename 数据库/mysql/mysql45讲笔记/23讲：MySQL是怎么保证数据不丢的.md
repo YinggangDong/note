@@ -54,6 +54,12 @@ write 和fsync的时机，是由参数sync_binlog控制的：
 1. **一种是，redo log buffer占用的空间即将达到 innodb_log_buffer_size一半的时候，后台线程会主动写盘。**注意，由于这个事务并没有提交，所以这个写盘动作只是write，而没有调用fsync，也就是只留在了文件系统的page cache。
 2. **另一种是，并行的事务提交的时候，顺带将这个事务的redo log buffer持久化到磁盘。**假设一个事务A执行到一半，已经写了一些redo log到buffer中，这时候有另外一个线程的事务B提交，如果innodb_flush_log_at_trx_commit设置的是1，那么按照这个参数的逻辑，事务B要把redo log buffer里的日志全部持久化到磁盘。这时候，就会带上事务A在redo log buffer里的日志一起持久化到磁盘。
 
+如果把innodb_flush_log_at_trx_commit设置成1，那么redo log在prepare阶段就要持久化一次，因为有一个崩溃恢复逻辑是要依赖于prepare 的redo log，再加上binlog来恢复的。（如果你印象有点儿模糊了，可以再回顾下[第15篇文章](https://time.geekbang.org/column/article/73161)中的相关内容）。
+
+每秒一次后台轮询刷盘，再加上崩溃恢复这个逻辑，InnoDB就认为redo log在commit的时候就不需要fsync了，只会write到文件系统的page cache中就够了。
+
+通常我们说MySQL的“双1”配置，指的就是sync_binlog和innodb_flush_log_at_trx_commit都设置成 1。也就是说，一个事务完整提交前，需要等待两次刷盘，一次是redo log（prepare 阶段），一次是binlog。
+
 ## 组提交（group commit）
 
 日志逻辑序列号（log sequence number，LSN）
@@ -144,7 +150,7 @@ WAL机制主要得益于两个方面：
 
 但是，将sync_binlog设置为N，对应的风险是：如果主机发生异常重启，会丢失最近N个事务的binlog日志。
 
-### binlog 延迟提交
+### binlog 延迟提交：binlog_group_commit_sync_delay 、binlog_group_commit_sync_no_delay_count 
 
 binlog_group_commit_sync_delay ：表示延迟多少微秒后才调用fsync
 
@@ -153,3 +159,20 @@ binlog_group_commit_sync_no_delay_count :表示累积多少次以后才调用fsy
 **这两个条件是或的关系，也就是说只要有一个满足条件就会调用fsync。**
 
 所以，当binlog_group_commit_sync_delay设置为0的时候，binlog_group_commit_sync_no_delay_count也无效了。
+
+### redo log写入策略：innodb_flush_log_at_trx_commit
+
+为了控制redo log的写入策略，InnoDB提供了innodb_flush_log_at_trx_commit参数，它有三种可能取值：
+
+1. 设置为0的时候，表示每次事务提交时都只是把redo log留在redo log buffer中;
+2. 设置为1的时候，表示每次事务提交时都将redo log直接持久化到磁盘；
+3. 设置为2的时候，表示每次事务提交时都只是把redo log写到page cache。
+
+## 什么时候生产库会设置“非双1”?
+
+1. 业务高峰期。一般如果有预知的高峰期，DBA会有预案，把主库设置成“非双1”。
+2. 备库延迟，为了让备库尽快赶上主库。@永恒记忆和@Second Sight提到了这个场景。
+3. 用备份恢复主库的副本，应用binlog的过程，这个跟上一种场景类似。
+4. 批量导入数据的时候。
+
+一般情况下，把生产库改成“非双1”配置，是设置innodb_flush_logs_at_trx_commit=2、sync_binlog=1000。
