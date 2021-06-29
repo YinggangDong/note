@@ -97,3 +97,71 @@ int BFS(Node start, Node target) {
 }
 ```
 
+## 三、双向BFS优化
+
+**传统的 BFS 框架就是从起点开始向四周扩散，遇到终点时停止；而双向 BFS 则是从起点和终点同时开始扩散，当两边有交集的时候停止**。
+
+为什么这样能够能够提升效率呢？其实从 Big O 表示法分析算法复杂度的话，它俩的最坏复杂度都是 `O(N)`，但是实际上双向 BFS 确实会快一些，我给你画两张图看一眼就明白了：
+
+![image-20210629174219341](图片/image-20210629174219341.png)
+
+![image-20210629174229048](图片/image-20210629174229048.png)
+
+图示中的树形结构，如果终点在最底部，按照传统 BFS 算法的策略，会把整棵树的节点都搜索一遍，最后找到 `target`；而双向 BFS 其实只遍历了半棵树就出现了交集，也就是找到了最短距离。从这个例子可以直观地感受到，双向 BFS 是要比传统 BFS 高效的。
+
+**不过，双向 BFS 也有局限，因为你必须知道终点在哪里**。
+
+**代码模板**
+
+```java
+int openLock(String[] deadends, String target) {
+    Set<String> deads = new HashSet<>();
+    for (String s : deadends) deads.add(s);
+    // 用集合不用队列，可以快速判断元素是否存在
+    Set<String> q1 = new HashSet<>();
+    Set<String> q2 = new HashSet<>();
+    Set<String> visited = new HashSet<>();
+
+    int step = 0;
+    q1.add("0000");
+    q2.add(target);
+
+    while (!q1.isEmpty() && !q2.isEmpty()) {
+        // 哈希集合在遍历的过程中不能修改，用 temp 存储扩散结果
+        Set<String> temp = new HashSet<>();
+
+        /* 将 q1 中的所有节点向周围扩散 */
+        for (String cur : q1) {
+            /* 判断是否到达终点 */
+            if (deads.contains(cur))
+                continue;
+            if (q2.contains(cur))
+                return step;
+            visited.add(cur);
+
+            /* 将一个节点的未遍历相邻节点加入集合 */
+            for (int j = 0; j < 4; j++) {
+                String up = plusOne(cur, j);
+                if (!visited.contains(up))
+                    temp.add(up);
+                String down = minusOne(cur, j);
+                if (!visited.contains(down))
+                    temp.add(down);
+            }
+        }
+        /* 在这里增加步数 */
+        step++;
+        // temp 相当于 q1
+        // 这里交换 q1 q2，下一轮 while 就是扩散 q2
+        q1 = q2;
+        q2 = temp;
+    }
+    return -1;
+}
+```
+
+双向 BFS 还是遵循 BFS 算法框架的，只是**不再使用队列，而是使用 HashSet 方便快速判断两个集合是否有交集**。
+
+另外的一个技巧点就是 **while 循环的最后交换** **`q1`** **和** **`q2`** **的内容**，所以只要默认扩散 `q1` 就相当于轮流扩散 `q1` 和 `q2`。
+
+**无论传统 BFS 还是双向 BFS，无论做不做优化，从 Big O 衡量标准来看，时间复杂度都是一样的**，只能说双向 BFS 是一种 trick，算法运行的速度会相对快一点。
