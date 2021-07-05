@@ -13,3 +13,7 @@ Windows Terminal 是微软推出的一款终端程序。
 重点来了：
 
 **取消分屏：Ctrl+Shift+w**
+
+## 参考内容
+
+【1】[什么是 Windows 终端？](https://docs.microsoft.com/zh-cn/windows/terminal/)
