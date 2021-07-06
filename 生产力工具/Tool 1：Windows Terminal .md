@@ -4,7 +4,7 @@ Windows Terminal 是微软推出的一款终端程序。
 
 ## 快捷键
 
-### 分屏快捷键：
+### 分屏快捷键
 
 左右分屏：Alt+Shift+=
 
@@ -14,7 +14,17 @@ Windows Terminal 是微软推出的一款终端程序。
 
 **取消分屏：Ctrl+Shift+w**
 
+### 打开新实例
 
+可以使用 wt.exe 从命令行打开 Windows 终端的新实例。 还可以改为使用执行别名 wt。
+
+| 选项                       | 说明                   |
+| :------------------------- | :--------------------- |
+| `--help`、`-h`、`-?`、`/?` | 显示帮助消息。         |
+| `--maximized`、`-M`        | 以最大化形式启动终端。 |
+| `--fullscreen`、`-F`       | 以全屏形式启动终端。   |
+
+> ` --maximized`、`-M` 和 `--fullscreen`、`-F` 仅在 [Windows 终端预览](https://aka.ms/terminal-preview/)中可用。
 
 ## 远程连接阿里云服务器
 
