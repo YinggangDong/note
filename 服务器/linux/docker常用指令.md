@@ -49,7 +49,13 @@ docker pull rabbitmq
 docker images
 ```
 
-## Docker 镜像删除
+## Docker 镜像部署
+
+```
+docker start mysql(镜像名称)
+```
+
+##  Docker 镜像删除
 
 1. 删除镜像
 
