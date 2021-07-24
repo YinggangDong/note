@@ -131,6 +131,5 @@ F:\ideaWorkSpace\YinggangDong.github.io\testblog>jekyll serve
 - [4] [ruby官方下载](https://rubyinstaller.org/downloads/)
 
 - [5] [RubyGems官方下载](https://rubygems.org/pages/download)
-- [6] [[环境搭建] 从零开始配置 vscode](https://anran758.github.io/blog/2018/02/06/dev-zero-configuration-vscode/)
-- 
+- [6] [[环境搭建] 从零开始配置 vscode](https://anran758.github.io/blog/2018/02/06/dev-zero-configuration-vscode/)·
 
