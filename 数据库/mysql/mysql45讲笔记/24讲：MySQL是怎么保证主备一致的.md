@@ -149,3 +149,30 @@ MySQL在binlog中记录了这个命令第一次执行时所在实例的server id
 
 ### 循环复制问题别根本上解决了么？
 
+以下情形可能会出现循环复制：
+
+1. 一种场景是，在一个主库更新事务后，用命令set global server_id=x修改了server_id。等日志再传回来的时候，发现server_id跟自己的server_id不同，就只能执行了。
+
+2. 另一种场景是，有三个节点的时候，如图7所示，trx1是在节点 B执行的，因此binlog上的server_id就是B，binlog传给节点 A，然后A和A’搭建了双M结构，就会出现循环复制。
+
+![image-20210727175316532](图片/image-20210727175316532.png)
+
+<center>图7 三节点循环复制</center>
+
+这种三节点复制的场景，做数据库迁移的时候会出现。
+
+如果出现了循环复制，可以在A或者A’上，执行如下命令：
+
+```
+stop slave；
+CHANGE MASTER TO IGNORE_SERVER_IDS=(server_id_of_B);
+start slave;
+```
+
+这样这个节点收到日志后就不会再执行。过一段时间后，再执行下面的命令把这个值改回来。
+
+```
+stop slave；
+CHANGE MASTER TO IGNORE_SERVER_IDS=();
+start slave;
+```
