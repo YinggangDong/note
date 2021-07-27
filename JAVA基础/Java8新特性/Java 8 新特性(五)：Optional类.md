@@ -425,7 +425,7 @@ private Map<String, String> getRuleMap() {
         CallResponse<List<DictValue>> callResponse = dictValueService.getDictValueListByDictTypeCode(McTimeRuleConstant.MC_TIME_RULE);
         log.info("调用字典接口查询维修中心时效规则--结束--->,耗时{}ms,结果{}", System.currentTimeMillis() - start, callResponse);
         //判断返回值是否为空,然后比较返回值code是否为"00",BBPF返回的正确返回值为"00"
-        List<DictValue> ruleList = Optional.ofNullable(callResponse)
+        List<DictValue> ruleList = Optional.(callResponse)
                 .filter((s) -> "00".equals(s.getCode()))
                 .map(CallResponse::getResult).orElseGet(ArrayList::new);
         //ruleList转为Map
