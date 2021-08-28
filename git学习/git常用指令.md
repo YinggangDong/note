@@ -118,7 +118,7 @@ git push --set-upstream origin dev1.4
 
 需要注意的是，该指定远端分支的指令会自动执行一次git push，也就是说执行完该指令后不需要再另外执行git push了，改动已经完成推送到远端的操作。
 
-ps：这是已经在本地生成ssh文件并配置到github但依然要求输入用户名密码的情况下的解决方案，如果还没有做ssh的配置的话，请参考[GitHub如何配置SSH Key](https://blog.csdn.net/u013778905/article/details/83501204) 进行配置。
+ps：这是已经在本地生成ssh文件并配置到github但依然要求输入用户名密码的情况下的解决方案，如果还没有做ssh的配置的话，请参考[GitHub如何配置SSH Key](https://blog.csdn.net/u013778905/article/details/83501204) 进行配置。
 
 ## 2.git branch 分支管理
 
@@ -1041,7 +1041,85 @@ Your branch is up to date with 'origin/master'.
 nothing to commit, working tree clean
 ```
 
+## git cherry-pick 挑拣合成
 
+当需要将某个分支的部分 commit 应用到主干或其他分支时，git cherry-pick 可以实现该功能。
+
+实际业务场景：
+
+某次上线后，发现存在线上问题需要进行紧急修复，由于开发分支是一个持续分支，不是每次都重新从主干拉取，因此直接在上面进行了bug的修复，提交后，发现有同事在上线完成后，commit 了部分代码，导致开发分支出现了部分不希望上线的代码。
+
+因此，需要从上线版本的 commit 拉取一个新的 bug 修复分支，拉取后，仅将 bug 修复的相关 commit 应用到该分支上，然后在各分支上进行标签的创建。
+
+### 一、基本用法
+
+`git cherry-pick`命令的作用，就是将指定的提交（commit）应用于其他分支。
+
+```bash
+$ git cherry-pick <commitHash>
+```
+
+上面命令就会将指定的提交`commitHash`，应用于当前分支。这会在当前分支产生一个新的提交，当然它们的哈希值会不一样。
+
+举例来说，代码仓库有`master`和`feature`两个分支。
+
+```bash
+a - b - c - d   Master
+         \
+           e - f - g Feature
+```
+
+现在将提交`f`应用到`master`分支。
+
+```bash
+# 切换到 master 分支
+$ git checkout master
+
+# Cherry pick 操作
+$ git cherry-pick f
+```
+
+上面的操作完成以后，代码库就变成了下面的样子。
+
+```bash
+a - b - c - d - f   Master
+         \
+           e - f - g Feature
+```
+
+从上面可以看到，`master`分支的末尾增加了一个提交`f`。
+
+`git cherry-pick`命令的参数，不一定是提交的哈希值，分支名也是可以的，表示转移该分支的最新提交。
+
+```bash
+$ git cherry-pick feature
+```
+
+上面代码表示将`feature`分支的最近一次提交，转移到当前分支。
+
+### 二、转移多个提交
+
+Cherry pick 支持一次转移多个提交。
+
+> ```bash
+> $ git cherry-pick <HashA> <HashB>
+> ```
+
+上面的命令将 A 和 B 两个提交应用到当前分支。这会在当前分支生成两个对应的新提交。
+
+如果想要转移一系列的连续提交，可以使用下面的简便语法。
+
+> ```bash
+> $ git cherry-pick A..B 
+> ```
+
+上面的命令可以转移从 A 到 B 的所有提交。它们必须按照正确的顺序放置：提交 A 必须早于提交 B，否则命令将失败，但不会报错。
+
+注意，使用上面的命令，提交 A 将不会包含在 Cherry pick 中。如果要包含提交 A，可以使用下面的语法。
+
+> ```bash
+> $ git cherry-pick A^..B 
+> ```
 
 ## 参考内容
 
