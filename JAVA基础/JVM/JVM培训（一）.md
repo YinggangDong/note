@@ -1,4 +1,4 @@
-JVM培训(一)
+# JVM培训
 
 JVM异常引起的问题:
 
@@ -103,11 +103,40 @@ parked ？
 
 
 
+## 可视化工具
 
+1. 针对OOM问题
 
+IBM-heapAnalyzer（phd），MAT
 
+2. 比较全面，可以做监控 dump,线程
 
+jprofiler visualvm
 
+3. jdk提供的
+
+jconsole、jvisualvm(jdk自带的工具)
+
+## 快照文件
+
+phd、hprof、dump、bin、javacore（内存地址...）
+
+## IBM-heapAnalyzer使用
+
+1. 启动HeapAnalyzer
+
+```shell
+java -jar -Xmx2g .\IBM-HeapAnalyzer.jar
+```
+
+2. 导入heap文件
+3. 点开leak suspect
+4. 点击里面可能存在内存泄漏的项
+5. Reference Tree 已经定位的地方，右键Locate a leak susupect
+6. 再右键 go to the largest drop in substree
+7. 分析原因
+
+## MAT使用
 
 
 
