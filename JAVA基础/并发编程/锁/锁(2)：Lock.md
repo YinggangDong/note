@@ -8,27 +8,40 @@ Lock显式锁是一个接口，比较常见的实现类 ReentrantLock 和 Reentr
 
 **因此，性能差距已经不是很大了，又因为 lock 锁需要显式的进行锁和释放，所以绝大部分时候我们都会选择 Synchronized 锁而非 Lock 锁。**
 
+那为什么还需要Lock呢？
+
+lock可以中断
+
 ## 2 核心类：AQS
 
 **juc 包 (java.util.concurrnt)** 中有一个抽象类 **AbstractQueuedSynchronizer简称为AQS**，这个类就是 lock 锁实现的基础。
 
-•       AQS其实就是一个可以给我们实现锁的**框架**
+- AQS其实就是一个可以给我们实现锁的**框架**
+- 内部实现的关键是：先进先出的队列、state状态
+- 定义了内部类ConditionObject
+-  拥有两种线程模式
+  - 独占模式
+  - 共享模式
 
-•       内部实现的关键是：**先进先出的队列、state状态**
+- 在LOCK包中的相关锁(常用的有ReentrantLock、 ReadWriteLock)都是**基于AQS来构建**
 
-•       定义了内部类ConditionObject
+一般我们**叫AQS为同步器**
 
-•       拥有两种线程模式
+### 2.1 AQS的同步状态
 
-–      独占模式
+![image-20211129105243695](图片/image-20211129105243695.png)
 
-–      共享模式
+通过volatile修饰，保证了可见性。
 
-•       在LOCK包中的相关锁(常用的有ReentrantLock、 ReadWriteLock)都是**基于AQS来构建**
+修改state状态值时使用CAS算法来实现：
 
-•       一般我们**叫AQS为同步器**
+![image-20211129105442818](图片/image-20211129105442818.png)
 
-### 2.1 AQS的状态值
+原子性方式修改state值，CAS算法实现。
+
+### 2.2 先进先出队列
+
+CLH队列（Craig，Landin，and Hagersten），是一个双向队列。
 
 
 
