@@ -29,6 +29,37 @@ yum -y install docker-ce
 systemctl start docker
 ```
 
+5. 设置Docker开机自启
+
+```
+systemctl enable docker
+```
+
+6. 设置镜像加速
+   1. 执行以下命令，打开/etc/docker/daemon.json配置文件。
+
+   ```
+   vim /etc/docker/daemon.json
+   ```
+
+   2. 按i切换至编辑模式，添加以下内容，并保存。
+
+   ```
+   {
+   "registry-mirrors": [
+    "https://mirror.ccs.tencentyun.com"
+   ]
+   }
+   ```
+
+   3. 执行以下命令，重启 Docker 即可。示例命令以 CentOS 7 为例。
+
+   ```
+   sudo systemctl restart docker
+   ```
+
+
+
 ## Docker 镜像拉取
 
 1. 查询镜像
