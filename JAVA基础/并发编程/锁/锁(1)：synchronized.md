@@ -8,13 +8,13 @@ synchronized是Java的一个**实现线程同步的关键字**，它能够将**�
 
 不过，**随着Javs SE 1.6对synchronized进行的各种优化后，synchronized并不会显得那么重了**。
 
--  它使用起来是非常简单的，只要在代码块(方法)添加关键字synchronized，即可以**实现同步**的功能~
+它使用起来是非常简单的，只要在代码块(方法)添加关键字synchronized，即可以**实现同步**的功能~
 
-  ```java
-  public synchronized void test(){
-        //doSomething
-  }
-  ```
+```java
+public synchronized void test(){
+      //doSomething
+}
+```
 
 synchronized是一种**互斥锁**
 
@@ -28,7 +28,7 @@ synchronized是一种**内置锁/监视器锁**
 
 #### 2.1 原子性
 
-**所谓原子性就是指一个操作或者多个操作，要么全部执行并且执行的过程不会被任何因素打断，要么就都不执行。**
+**所谓原子性就是指多个操作，要么全部执行并且执行的过程不会被任何因素打断，要么就都不执行。**
 
 在Java中，对基本数据类型的变量的读取和赋值操作是原子性操作，即这些操作是不可被中断的，要么执行，要么不执行。但是像i++、i+=1等操作字符就不是原子性的，它们是分成**读取、计算、赋值**几步操作，原值在这些步骤还没完成时就可能已经被赋值了，那么最后赋值写入的数据就是脏数据，无法保证原子性。
 
@@ -129,7 +129,7 @@ public class SynBasic {
 ```java
   public void test();
     Code:
-       0: ldc           #2                  // class cn/dyg/keyword/syn/SynBasic
+       0: ldc           #2                  // class SynBasic
        2: dup
        3: astore_1
        4: monitorenter											//申请获得对象的内置锁
@@ -157,7 +157,7 @@ public class SynBasic {
 
 JVM规范规定JVM基于进入和退出Monitor对象来实现方法同步和代码块同步，但两者的实现细节不一样。代码块同步是使用monitorenter和monitorexit指令实现，而方法同步是使用另外一种方式实现的，细节在JVM规范里并没有详细说明，但是方法的同步同样可以使用这两个指令来实现。
 
-monitorenter指令是在编译后插入到同步代码块的开始位置，而monitorexit是插入到方法结束处和异常处， JVM要保证每个monitorenter必须有对应的monitorexit与之配对。任何对象都有一个 monitor 与之关联，当且一个monitor 被持有后，它将处于锁定状态。线程执行到 monitorenter 指令时，将会尝试获取对象所对应的 monitor 的所有权，即尝试获得对象的锁。
+monitorenter指令是在编译后插入到同步代码块的开始位置，而monitorexit是插入到方法结束处和异常处， JVM要保证每个monitorenter必须有对应的monitorexit与之配对。任何对象都有一个 monitor 与之关联，当一个monitor 被持有后，它将处于锁定状态。线程执行到 monitorenter 指令时，将会尝试获取对象所对应的 monitor 的所有权，即尝试获得对象的锁。
 
 每一个锁都对应一个monitor对象，在HotSpot虚拟机中它是由ObjectMonitor实现的（C++实现）。每个对象都存在着一个monitor与之关联，对象与其monitor之间的关系有存在多种实现方式，如monitor可以与对象一起创建销毁或当线程试图获取对象锁时自动生成，但当一个monitor被某个线程持有后，它便处于锁定状态。
 
@@ -224,11 +224,11 @@ ObjectMonitor 中有两个队列，_WaitSet 和 _EntryList，用来保存 Object
 
 **轻量级锁**
 
-轻量级锁是由偏向锁升级而来，当存在第二个线程申请同一个锁对象时，偏向锁就会立即升级为轻量级锁。注意这里的第二个线程只是申请锁，不存在两个线程同时竞争锁，可以是一前一后地交替执行同步块。
+轻量级锁是由偏向锁升级而来，当存在第二个线程申请同一个锁对象时，偏向锁就会立即升级为轻量级锁。**注意这里的第二个线程只是申请锁，不存在两个线程同时竞争锁，可以是一前一后地交替执行同步块。**
 
-在轻量级锁状态下，当前线程会在栈帧下创建 Lock Record，Lock Record 会把 Mark Word 的信息拷贝进去，且有个 Owner 指针指向加锁的对象。
+在轻量级锁状态下，当前线程会在栈帧下创建 **Lock Record**，Lock Record 会把 Mark Word 的信息拷贝进去，且有个 Owner 指针指向加锁的对象。
 
-线程执行到同步代码时，则用 CAS 视图将 Mark Word 的指向到线程栈帧的 Lock Record，假设 CAS 修改成功，则获取得到轻量级锁。
+线程执行到同步代码时，则用 CAS 试图将 Mark Word 指向到线程栈帧的 Lock Record，假设 CAS 修改成功，则获取得到轻量级锁。
 
 假设修改失败，则自旋（重试），自旋一定次数后，则升级为重量级锁。
 
@@ -399,8 +399,6 @@ synchronized一般可以用来修饰三种东西：
 被加锁的方法和代码块均放在一个类中，用来支持演示各种锁的情形，其实例代码如下：
 
 ```java
-package cn.dyg.keyword.syn;
-
 /**
  * SynObj 类是 synchronized加锁对象
  * synchronized 是 Java 的一个关键字，它能够将代码块(方法)锁起来
@@ -410,18 +408,26 @@ package cn.dyg.keyword.syn;
  **/
 public class SynObj {
 
+    private static final int FIVE_INT = 5;
+    private static final int SLEEP_MILLIS = 1000;
+    private static final int TEN = 10;
     private final Object lock1 = new Object();
     private final Object lock2 = new Object();
 
     /**
-     * staticMethod 给静态方法付加锁,锁的是SynObj类
+     * staticMethod 给静态方法加锁,锁的是SynObj类
      *
      * @author dongyinggang
      * @date 2020/12/9 13:11
      */
-    public synchronized static void staticMethod(){
-        while (true){
+    public static synchronized void staticMethod() {
+        for (int i = 0; i < FIVE_INT; i++) {
             System.out.println(Thread.currentThread().getName());
+            try {
+                Thread.sleep(SLEEP_MILLIS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -432,9 +438,14 @@ public class SynObj {
      * @author dongyinggang
      * @date 2020/11/27 16:28
      */
-    public synchronized void instanceMethod(){
-        while (true){
+    public synchronized void instanceMethod() {
+        for (int i = 0; i < FIVE_INT; i++) {
             System.out.println(Thread.currentThread().getName());
+            try {
+                Thread.sleep(SLEEP_MILLIS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -445,48 +456,84 @@ public class SynObj {
      * @author dongyinggang
      * @date 2020/11/27 16:39
      */
-    public synchronized void synchronizedBlock(){
+    public void synchronizedBlock() {
         // 修饰代码块
-        synchronized (this){
-            while (true){
+        synchronized (this) {
+            for (int i = 0; i < FIVE_INT; i++) {
                 System.out.println(Thread.currentThread().getName());
+                try {
+                    Thread.sleep(SLEEP_MILLIS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    public synchronized void synchronizedBlockThis(){
+    public void synchronizedBlockThis() {
+        System.out.println("已进入 synchronizedBlockThis 方法，需要获取当前实例对象的锁才能继续执行...");
         // 修饰代码块
-        synchronized (this){
-            while (true){
+        synchronized (this) {
+            System.out.println("synchronizedBlockThis 方法获取到当前实例的锁，继续执行");
+            for (int i = 0; i < FIVE_INT; i++) {
                 System.out.println(Thread.currentThread().getName());
+                try {
+                    Thread.sleep(SLEEP_MILLIS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
     /**
-     * synchronizedBlockObj1 和 synchronizedBlockObj1 方法是 两个方法分别锁不同的对象
+     * synchronizedBlockObj1 和 synchronizedBlockObj2 方法是 两个方法分别锁不同的对象
      * 这样对两个对象分别加锁，实际上是互不影响的，可以分别执行，不会阻塞另一个线程
      *
      * @author dongyinggang
      * @date 2020/12/9 19:41
      */
-    public void synchronizedBlockObj1(){
+    public void synchronizedBlockObj1() {
         // 修饰代码块
-        synchronized (lock1){
-            while (true){
+        synchronized (lock1) {
+            for (int i = 0; i < FIVE_INT; i++) {
                 System.out.println(Thread.currentThread().getName());
+                try {
+                    Thread.sleep(SLEEP_MILLIS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    public void synchronizedBlockObj2(){
+    public void synchronizedBlockObj2() {
         // 修饰代码块
-        synchronized (lock2){
-            while (true){
+        synchronized (lock2) {
+            for (int i = 0; i < FIVE_INT; i++) {
                 System.out.println(Thread.currentThread().getName());
+                try {
+                    Thread.sleep(SLEEP_MILLIS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
+
+    public static void doSomething() {
+        int loopTimes = 0;
+        while (loopTimes < TEN) {
+            System.out.println("无锁方法可以被调用");
+            try {
+                Thread.sleep(SLEEP_MILLIS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            loopTimes++;
+        }
+    }
+
 }
 
 ```
@@ -586,22 +633,20 @@ package cn.dyg.keyword.syn;
  **/
 public class SynStaticRunnable implements Runnable {
 
-    private SynObj synObj;
-
-    public SynStaticRunnable(SynObj synObj){
-        this.synObj = synObj;
+    public SynStaticRunnable(SynObj synObj) {
     }
 
     @Override
     public void run() {
         //调用加锁的静态方法
         SynObj.staticMethod();
+        
     }
 
     public static void main(String[] args) {
         twoThreadTwoInstance();
         //其他方法依然可以正常调用。
-        doSomething();
+        SynObj.doSomething();
     }
 
     /**
@@ -621,18 +666,15 @@ public class SynStaticRunnable implements Runnable {
         thread1.start();
         thread2.start();
     }
-
-    private static void doSomething(){
-        while(true){
-            System.out.println("其他方法可以被调用");
-        }
-    }
 }
+
 ```
 
-但注意的是，尽管我们说这种情况下锁的是类，但要明确，该类的其他方法是可以被正常调用的。
+但注意的是，尽管我们说这种情况下锁的是类，但要明确，该类的非同步方法是可以被正常调用的。
 
-![image-20201209200023484](图片/image-20201209200023484.png)
+![image-20211222084838227](图片/image-20211222084838227.png)
+
+![image-20211222101910106](图片/image-20211222101910106.png)
 
 如果使用实例来调用静态方法,编译器会提示但运行不会报错。输出和上面的一致。我们每次都是起了两个线程，在我们没有指定名称的情况下，两个线程名称分别为Thread-0和Thread-1，每次输出的名称只有一个，但并不是固定的，哪个资源先获取到了锁，就会死死抱住不放开。
 
@@ -763,7 +805,7 @@ private static void twoThreadSynTwoObj(){
 
 ### 4.4 同步一个类
 
-当 synchronized 锁代码块的时候，除了直接锁对象的形式外，还可以锁类时，形如 synchronized(Object.class), 这样的锁和修饰静态方法比较像，作用于整个类。
+当 synchronized 锁代码块的时候，除了直接锁对象的形式外，还可以锁类，形如 synchronized(Object.class), 这样的锁和修饰静态方法比较像，作用于整个类。
 
 也就是说两个线程调用同一个类的不同对象上的这种同步语句，也会进行同步。因为只能有一个线程持有这个类的资源。
 
