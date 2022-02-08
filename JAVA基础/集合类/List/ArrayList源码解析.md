@@ -24,9 +24,6 @@
 
    ![ArrayList类图](ArrayList源码解析.assets/image-20200909151111393.png)
 
-   ![ArrayList类图](https://gitee.com/BelieverD/Picture/raw/master/img/20200909151127.png)
-
-
 
 ## 二、源码解析
 
