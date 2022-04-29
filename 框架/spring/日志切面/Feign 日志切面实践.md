@@ -13,7 +13,6 @@
 3. 如何将切点表达式提取至配置文件？
 4. `@Value` 设置默认值后，为什么读取不到配置文件中的值了？
 5. 如何自己仿照开源组件的方案封装成一个功能？
-6. 
 
 ## 基础知识
 
@@ -111,7 +110,12 @@ eg:
 4. 设置自定义开关：通过定义 @EnableFeignLog 注解，将其作为开关，通过在启动类上添加该注解作为开启统一 feign 日志的条件
 4. 提取公共组件：作为基础配置提取至common包
 
-Feign
+### 切点的获取方案
+
+期望切点为含 `@FeignClient` 注解的所有 `feign` 调用接口的方法。过程中考虑了几类方案进行测试验证
+
+1. 通过 `@within(com.snbc.bbpf.mdf.cloud.netflix.feign.FeignClient)` 或 `@target(com.snbc.bbpf.mdf.cloud.netflix.feign.FeignClient)` 的方式令生成的代理类的所有方法成为切点。（不可行，生成的代理类无对应注解）
+2. 通过控制 `feign` 接口的包路径设置切点 
 
 ### 声明日志切面
 
@@ -269,7 +273,7 @@ public class FeignLogAspect {
 1. 支持按注解声明切点 ( `@within/@target` ) 的均只能定义被注解注释的类。
 2. 无法将 `@FeignClient` 注解的相关 `feign` 调用接口作为切点，被注释的 `feignClient` 的实现类是动态生成的，不会带有 `@FeignClient` 注解 。
    - 该问题，在 `2020.07` `spring-cloud-openfeign`的 `2.2.4-realease` 进行了处理，给 `@FeignClient` 加上了 `@Inherited` 注解，使注解能够被实现类继承。详情参见此 `issue` https://github.com/spring-cloud/spring-cloud-openfeign/issues/322
-   - 在 `Spring 5.×` 版本中,也不存在该问题，原因是在扫描注解时
+   - 在 `Spring 5.×` 版本中,也不存在该问题，原因是在扫描注解时，会将范围扩大至
 3. 期望切点表达式提取至配置文件定义：通过 @Pointcut 声明切点时，切点表达式是常量，无法通过配置文件自定义
 
 
@@ -522,6 +526,10 @@ public class AdminApp {
 ```
 
 在启动类上添加 @EnableFeignLog 注解开启 Feign 统一日志。 
+
+### 提取公共组件
+
+因为
 
 ## 参考文章<div id = "refer-anchor"></div>
 
