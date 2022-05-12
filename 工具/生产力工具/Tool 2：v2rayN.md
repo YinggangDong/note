@@ -8,9 +8,7 @@ github地址：https://github.com/2dust/v2rayN
 
 ## 使用技巧
 
-大陆白名单模式
-
-
+### 大陆白名单模式
 
 >  v2ray版本3.13
 >
@@ -23,4 +21,8 @@ github地址：https://github.com/2dust/v2rayN
 结果如图所示：
 
 ![image-20210707172147195](图片/image-20210707172147195.png)
+
+### 配置特定网站走代理
+
+
 

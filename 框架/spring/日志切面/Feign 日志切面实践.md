@@ -1,15 +1,16 @@
 # Feign 日志切面实践
 
-> 背景：统一记录 Feign 的调用日志的入参、出参、调用耗时，不再在代码中单独处理。
+> 背景：统一记录 `Feign` 的调用日志的入参、出参、调用耗时，不因日志做侵入式开发。
 
 ## 思路
 
-创建统一的日志切面，以 @FeignClinet 注解标识的 feign 调用类作为切点，执行对应的入参、出参、调用耗时的记录。
+创建统一的日志切面，以 `@FeignClinet` 注解标识的 `feign` 调用类作为切点，执行对应的入参、出参、调用耗时的记录。
 
 ## 分享核心点
 
 1. `feign` 加载的过程中，都做了哪些事，涉及了哪些原理？
-2. 为什么做不到以 `@FeignClinet` 生成的所有代理类作为切点？
+1. AOP基础和切点表达式的定义
+2. 如何给所有的 `feign` 调用加日志？为什么做不到以 `@FeignClinet` 生成的所有代理类作为切点？
 3. 如何将切点表达式提取至配置文件？
 4. `@Value` 设置默认值后，为什么读取不到配置文件中的值了？
 5. 如何自己仿照开源组件的方案封装成一个功能？
@@ -19,6 +20,10 @@
 ### Feign 的作用
 
 Spring Cloud 微服务间调用，通常是通过注册中心直接进行调用，常用的方案是 Feign 远程调用，Feign 通过封装，将 HTTP 的构建、调用细节隐藏起来，将服务间调用简化成了类服务内部的接口调用的形式。
+
+### Feign 的原理
+
+
 
 ### AOP 中涉及的基础概念
 
@@ -50,7 +55,7 @@ Spring 切面可用的  5 种通知类型：
 4. After-throwing——在方法抛出异常后进行通知
 5. Around——通知包裹了被通知的方法，在被通知的方法调用之前和调用之后执行自定义的行为
 
-#### 织入：
+#### 织入
 
 **织入是将切面应用到目标对象来创建的代理对象过程。**
 
@@ -115,19 +120,21 @@ eg:
 期望切点为含 `@FeignClient` 注解的所有 `feign` 调用接口的方法。过程中考虑了几类方案进行测试验证
 
 1. 通过 `@within(com.snbc.bbpf.mdf.cloud.netflix.feign.FeignClient)` 或 `@target(com.snbc.bbpf.mdf.cloud.netflix.feign.FeignClient)` 的方式令生成的代理类的所有方法成为切点。（不可行，生成的代理类无对应注解）
-2. 通过控制 `feign` 接口的包路径设置切点 
+2. 通过控制 `feign` 接口的包路径设置切点 
 
 ### 声明日志切面
 
-通过 @Aspect 注解实现日志切面。
+#### @Aspect 方案
+
+通过 `@Aspect` 注解实现日志切面。
 
 核心工作：
 
-1. 通过 @Aspect 定义切面类。
+1. 通过 `@Aspect` 定义切面类。
 
-2. 通过 @PointCut 定义切点。
+2. 通过 `@PointCut` 定义切点。
 3. 出入参长度截取，调用时间记录。
-4. 异常捕获再抛出，finally保证日志打印。
+4. 异常捕获再抛出，`finally` 保证日志打印。
 
 ```java
 package com.snbc.smcp.workorder.admin.config;
@@ -266,15 +273,21 @@ public class FeignLogAspect {
 
 ```
 
-问题：
+#### 问题
 
-一、无法通过注解对所有 feign 调用类进行环绕通知
+一、无法通过注解对所有 `feign` 调用类进行环绕通知
 
 1. 支持按注解声明切点 ( `@within/@target` ) 的均只能定义被注解注释的类。
+
 2. 无法将 `@FeignClient` 注解的相关 `feign` 调用接口作为切点，被注释的 `feignClient` 的实现类是动态生成的，不会带有 `@FeignClient` 注解 。
+
    - 该问题，在 `2020.07` `spring-cloud-openfeign`的 `2.2.4-realease` 进行了处理，给 `@FeignClient` 加上了 `@Inherited` 注解，使注解能够被实现类继承。详情参见此 `issue` https://github.com/spring-cloud/spring-cloud-openfeign/issues/322
+
    - 在 `Spring 5.×` 版本中,也不存在该问题，原因是在扫描注解时，会将范围扩大至
-3. 期望切点表达式提取至配置文件定义：通过 @Pointcut 声明切点时，切点表达式是常量，无法通过配置文件自定义
+
+二、无法将切点表达式提取至配置文件定义
+
+通过 `@Pointcut` 声明切点时，切点表达式是常量，无法通过配置文件自定义
 
 
 
