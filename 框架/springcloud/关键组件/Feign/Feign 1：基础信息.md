@@ -73,3 +73,4 @@
 
 1. [SpringBoot与SpringCloud版本对应关系](https://blog.csdn.net/majinggogogo/article/details/109129910)
 2. [Spring Boot 与 Spring Cloud 详细映射关系](https://start.spring.io/actuator/info)
+2. [[Feign]学习log](https://blog.csdn.net/qq_34614236/article/details/117715823)
