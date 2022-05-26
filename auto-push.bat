@@ -10,4 +10,10 @@ git merge origin/master
 
 git push --set-upstream origin %var%
 
-git 
+git checkout develop 
+
+git merge %var%
+
+git push --set-upstream origin develop
+
+pause
