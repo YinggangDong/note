@@ -4,7 +4,7 @@ set /p var=please enter the feature name which want push ~
 
 echo %var%
 
-git cehckout %var%
+git checkout %var%
 
 git merge origin/master
 
