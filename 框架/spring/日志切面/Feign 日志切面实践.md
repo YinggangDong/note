@@ -10,7 +10,7 @@
 
 1. `feign` 加载的过程中，都做了哪些事，涉及了哪些原理？
 1. AOP基础和切点表达式的定义
-2. 如何给所有的 `feign` 调用加日志？为什么做不到以 `@FeignClinet` 生成的所有代理类作为切点？
+2. 如何给所有的 `feign` 调用加日志？为什么做不到以 `@FeignClinet` 生成的所有代理类作为切点？
 3. 如何将切点表达式提取至配置文件？
 4. `@Value` 设置默认值后，为什么读取不到配置文件中的值了？
 5. 如何自己仿照开源组件的方案封装成一个功能？
@@ -134,7 +134,7 @@ eg:
 
 2. 通过 `@PointCut` 定义切点。
 3. 出入参长度截取，调用时间记录。
-4. 异常捕获再抛出，`finally` 保证日志打印。
+4. 异常捕获再抛出，`finally` 保证日志打印。
 
 ```java
 package com.snbc.smcp.workorder.admin.config;
@@ -542,7 +542,7 @@ public class AdminApp {
 
 ### 提取公共组件
 
-因为
+
 
 ## 参考文章<div id = "refer-anchor"></div>
 
