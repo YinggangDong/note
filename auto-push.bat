@@ -4,9 +4,13 @@ set /p var=please enter the feature name which want push ~
 
 echo %var%
 
+git checkout master
+
+git pull origin master
+
 git checkout %var%
 
-git merge origin/master
+git merge master
 
 git push --set-upstream origin %var%
 
