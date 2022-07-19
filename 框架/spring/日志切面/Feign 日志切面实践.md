@@ -10,7 +10,7 @@
 
 1. `feign` 加载的过程中，都做了哪些事，涉及了哪些原理？
 1. AOP基础和切点表达式的定义
-2. 如何给所有的 `feign` 调用加日志？为什么做不到以 `@FeignClinet` 生成的所有代理类作为切点？
+2. 如何给所有的 `feign` 调用加日志？为什么做不到以 `@FeignClinet` 生成的所有代理类作为切点？
 3. 如何将切点表达式提取至配置文件？
 4. `@Value` 设置默认值后，为什么读取不到配置文件中的值了？
 5. 如何自己仿照开源组件的方案封装成一个功能？
@@ -20,10 +20,6 @@
 ### Feign 的作用
 
 Spring Cloud 微服务间调用，通常是通过注册中心直接进行调用，常用的方案是 Feign 远程调用，Feign 通过封装，将 HTTP 的构建、调用细节隐藏起来，将服务间调用简化成了类服务内部的接口调用的形式。
-
-### Feign 的原理
-
-
 
 ### AOP 中涉及的基础概念
 
@@ -134,7 +130,7 @@ eg:
 
 2. 通过 `@PointCut` 定义切点。
 3. 出入参长度截取，调用时间记录。
-4. 异常捕获再抛出，`finally` 保证日志打印。
+4. 异常捕获再抛出，`finally` 保证日志打印。
 
 ```java
 package com.snbc.smcp.workorder.admin.config;
@@ -471,7 +467,7 @@ feignPath=execution(* com.snbc.smcp.srds.feign..*(..))
 
 3. 加载时会获取到 `@Value `中 `feignPath` 的默认值，而不是期望的配置文件中的配置。
 
-原因未找到，应该是Spring的解析问题。`Spring 5.0.3`  实测无该问题。
+原因未找到，应该是 Spring4 版本的解析问题。`Spring 5.0.3`  实测无该问题。
 
 
 
@@ -542,9 +538,13 @@ public class AdminApp {
 
 ### 提取公共组件
 
-因为
+因为希望项目中多个微服务均能够使用该方案用来记录 Feign ，因此需要将相关的代码抽取到公共模块中，让别的项目引入后即可显式开启。
 
-## 参考文章<div id = "refer-anchor"></div>
+将相关的类均移至公共模块下，公共模块版本升级，其他项目引入升级后的版本，即可通过 @EnableFeignLog 来开启feign日志记录。
+
+## 参考文章
+
+<div id = "refer-anchor"></div>
 
 1. [@Pointcut 注解的使用](https://blog.csdn.net/baidu_37366055/article/details/109989145)
 2. [Spring-AOP @AspectJ切点函数之@within()和@target](https://cloud.tencent.com/developer/article/1862474)

@@ -244,7 +244,7 @@ ExceptionBenchmark.throwExceptionWithoutAddingStackTrace  avgt   10    0.402 ± 
 
 因此，如果将业务异常默认不获取堆栈信息，能够让异常的性能有效降低。
 
-异常的创建过程中，实际是异常基类的 `Throwable` 的 `fillInStackTrace` 方法来获取并填充堆栈信息，因此重写该方法，不让其去获取并设置堆栈信息即可。
+异常的创建过程中，实际是异常基类的 `Throwable` 的 `fillInStackTrace` 方法来获取并填充堆栈信息，因此重写该方法，不让其去获取并设置堆栈信息即可。
 
 2. 异常性能优化的相关验证
 
