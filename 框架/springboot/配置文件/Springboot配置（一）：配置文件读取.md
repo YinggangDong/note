@@ -14,7 +14,25 @@
 
 
 
-## 2.@ConfigurationProperties注解进行批量注入
+
+
+## 2.@ConfigurationProperties 注解进行批量注入
+
+@ConfigurationProperties 注解可以将相同前缀的配置全量的读取映射到类属性中，该注解用于类上，指定前缀后，会按配置文件中的配置按名称映射到类属性中。
+
+配置文件：
+
+```properties
+mail.host=XXXX
+mail.password=XXXX
+```
+
+参数读取类
+
+```
+```
+
+
 
 
 
