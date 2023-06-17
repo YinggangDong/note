@@ -33,7 +33,7 @@ public class InboundVO extends OutboundVO {
     /**
      * 货损图片
      */
-    @ApiModelProperty(value = "货损图片", example = "[\"https://testbase.xinbeiyang.info/alioss/b.jpg\",\"https://testbase.xinbeiyang.info/alioss/a.jpg\"]")
+    @ApiModelProperty(value = "货损图片", example = "[\"https://XXX.XXX.info/alioss/b.jpg\",\"https://XXXX.XXX.info/alioss/a.jpg\"]")
     private String damageImageList;
 
     /**
@@ -120,7 +120,7 @@ public class OutboundVO {
      * 异常图片列表 | 设备图片列表
      */
     @ApiModelProperty(value = "异常图片列表", example =
-            "[\"https://testbase.xinbeiyang.info/alioss/b.jpg\",\"https://testbase.xinbeiyang.info/alioss/a.jpg\"]")
+            "[\"https://XXXX.XXXX.info/alioss/b.jpg\",\"https://XXXX.XXXX.info/alioss/a.jpg\"]")
     private String abnormalImageList;
 
     /**
